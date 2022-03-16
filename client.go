@@ -23,12 +23,14 @@ type Client struct {
 	md      metadata.MD
 }
 
-func (c *Client) SetTimeout(timeout int) {
+func (c *Client) SetTimeout(timeout int) *Client {
 	c.timeout = timeout
+	return c
 }
 
-func (c *Client) SetToken(token string) {
+func (c *Client) SetToken(token string) *Client {
 	c.md = metadata.Pairs("authorization", token)
+	return c
 }
 
 func (c *Client) ValidateJwt() error {
