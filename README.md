@@ -7,10 +7,15 @@
 
 ## 快速开始
 
+### 安装
+```
+go get -u github.com/Macrow/ucs-go-sdk
+```
+
 ### 验证Jwt
 ```
-v := NewValidator(rsaPublicKey)
-ok, jwtUser, err := v.ValidateJwt(token)
+validator := NewValidator(rsaPublicKey)
+jwtUser, err := validator.ValidateJwt(token)
 ```
 
 ### 创建连接UCS的客户端
@@ -22,20 +27,20 @@ client.SetToken(token)
 
 ### UCS服务端验证Jwt
 ```
-ok, err := client.ValidateJwt()
+err := client.ValidateJwt()
 ```
 
 ### UCS服务端验证操作码
 ```
-ok, err := client.CheckOperationByCode("UCS_O_CODE")
+err := client.ValidatePermOperationByCode("UCS_O_CODE")
 ```
 
 ### UCS服务端验证接口
 ```
-ok, err := client.CheckAction("ucs", "/api/v1/ucs/users", "get")
+err := client.ValidatePermAction("ucs", "/api/v1/ucs/users", "get")
 ```
 
 ### UCS服务端验证用户是否拥有机构权限
 ```
-ok, err := client.CheckOrgById("org_id_is_here")
+err := client.ValidatePermOrgById("org_id_is_here")
 ```
