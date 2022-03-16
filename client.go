@@ -31,11 +31,11 @@ func (c *Client) SetToken(token string) {
 	c.md = metadata.Pairs("authorization", token)
 }
 
-func (c *Client) ValidateJwt() (bool, error) {
+func (c *Client) ValidateJwt() error {
 	return authentication(c)
 }
 
-func (c *Client) CheckOperationByCode(operationCode string) (bool, error) {
+func (c *Client) ValidatePermOperationByCode(operationCode string) error {
 	return authorization(c, &pb.AuthorizationRequest{
 		Payload: &pb.AuthorizationRequest_OperationCode{
 			OperationCode: operationCode,
@@ -43,7 +43,7 @@ func (c *Client) CheckOperationByCode(operationCode string) (bool, error) {
 	})
 }
 
-func (c *Client) CheckAction(service, path, method string) (bool, error) {
+func (c *Client) ValidatePermAction(service, path, method string) error {
 	return authorization(c, &pb.AuthorizationRequest{
 		Payload: &pb.AuthorizationRequest_Action{
 			Action: &pb.Action{
@@ -55,7 +55,7 @@ func (c *Client) CheckAction(service, path, method string) (bool, error) {
 	})
 }
 
-func (c *Client) CheckOrgById(orgId string) (bool, error) {
+func (c *Client) ValidatePermOrgById(orgId string) error {
 	return authorization(c, &pb.AuthorizationRequest{
 		Payload: &pb.AuthorizationRequest_OrgId{
 			OrgId: orgId,
@@ -63,9 +63,9 @@ func (c *Client) CheckOrgById(orgId string) (bool, error) {
 	})
 }
 
-func authentication(c *Client) (bool, error) {
+func authentication(c *Client) error {
 	if c.options == nil {
-		return false, fmt.Errorf("please create client instance and set token first")
+		return fmt.Errorf("please create client instance and set token first")
 	}
 
 	conn, err := grpc.Dial(fmt.Sprintf("%v:%d", c.addr, c.port), c.options...)
@@ -75,7 +75,7 @@ func authentication(c *Client) (bool, error) {
 		}
 	}()
 	if err != nil {
-		return false, fmt.Errorf(err.Error())
+		return fmt.Errorf(err.Error())
 	}
 
 	service := pb.NewAuthServiceClient(conn)
@@ -86,17 +86,17 @@ func authentication(c *Client) (bool, error) {
 
 	res, err := service.Authentication(ctx, &pb.AuthenticationRequest{})
 	if err != nil {
-		return false, fmt.Errorf(err.Error())
+		return fmt.Errorf(err.Error())
 	}
 	if !res.Success {
-		return false, fmt.Errorf(res.Error.Reason)
+		return fmt.Errorf(res.Error.Reason)
 	}
-	return true, nil
+	return nil
 }
 
-func authorization(c *Client, req *pb.AuthorizationRequest) (bool, error) {
+func authorization(c *Client, req *pb.AuthorizationRequest) error {
 	if c.options == nil {
-		return false, fmt.Errorf("please create client instance first")
+		return fmt.Errorf("please create client instance first")
 	}
 
 	conn, err := grpc.Dial(fmt.Sprintf("%v:%d", c.addr, c.port), c.options...)
@@ -107,7 +107,7 @@ func authorization(c *Client, req *pb.AuthorizationRequest) (bool, error) {
 	}()
 
 	if err != nil {
-		return false, fmt.Errorf(err.Error())
+		return fmt.Errorf(err.Error())
 	}
 	service := pb.NewAuthServiceClient(conn)
 
@@ -117,10 +117,10 @@ func authorization(c *Client, req *pb.AuthorizationRequest) (bool, error) {
 
 	res, err := service.Authorization(ctx, req)
 	if err != nil {
-		return false, fmt.Errorf(err.Error())
+		return fmt.Errorf(err.Error())
 	}
 	if !res.Success {
-		return false, fmt.Errorf(res.Error.Reason)
+		return fmt.Errorf(res.Error.Reason)
 	}
-	return true, nil
+	return nil
 }

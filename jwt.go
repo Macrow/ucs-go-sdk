@@ -16,20 +16,21 @@ const (
 )
 
 type JwtUser struct {
-	Id       string  `json:"id"`   // 用户id
-	Name     string  `json:"name"` // 用户登录名
-	DeviceId string  `json:"did"`  // 用户登录名
-	Issuer   string  `json:"iss"`  // 签发者
-	IssueAt  float64 `json:"iat"`  // 签发时间
-	ExpireAt float64 `json:"exp"`  // 过期时间
+	Id       string  `json:"id"`    // 用户id
+	Name     string  `json:"name"`  // 用户登录名
+	DeviceId string  `json:"did"`   // 用户登录名
+	Issuer   string  `json:"iss"`   // 签发者
+	IssueAt  float64 `json:"iat"`   // 签发时间
+	ExpireAt float64 `json:"exp"`   // 过期时间
+	Token    string  `json:"token"` // 令牌字符串
 }
 
-func ValidateJwt(publicKey []byte, tokenString string) (token *jwt.Token, user *JwtUser, err error) {
+func ValidateJwt(publicKey []byte, tokenString string) (user *JwtUser, err error) {
 	key, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
 	if err != nil {
 		return
 	}
-	token, err = jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected sign method: %v", t.Method.Alg())
 		}
@@ -51,6 +52,7 @@ func ValidateJwt(publicKey []byte, tokenString string) (token *jwt.Token, user *
 		Issuer:   claims[JwtTokenClaimsIssuer].(string),
 		IssueAt:  claims[JwtTokenClaimsIssueAt].(float64),
 		ExpireAt: claims[JwtTokenClaimsExpireAt].(float64),
+		Token:    tokenString,
 	}
 	return
 }

@@ -49,59 +49,40 @@ CQIDAQAB
 const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJleHAiOjE2Nzg5MzA2NjAsImlhdCI6MTY0NzM5NDY2MCwiaWQiOiJjOGZqYzl1NDliM2hibW92NWl1ZyIsImlzcyI6InVjcyIsIm5hbWUiOiJyb290In0.YVlCteAlS01LwxShyFXPlU_PTvaanRSwB1aZ78PMbr73cZabA-v7K9x3yz_LQJ9NKTUbnO_gLGxTVPgCwOR7hiyxy2QO5ZNxGOqJybJVe-1LfQ_zKIHzVKHBg3qZoRkcS-IbdfqQiSk_sfOlaWOsoMokEQvtsEXEt9g60b3sKz2UU5b57-0PUmZfawrE-3hsPTOk4APpQDmTZo2y609DHtTuozVNRXTsn7EE4ItPHBHp7ofJpUGrHbXj80Eu7G25aEkmlZw-oaQ06qH7O2VHjfTX1rjVCFALHXew8SPrRsuQrAjaoTWF-uCSaVZIqGDtzHjljeeBkG0K0Jr0lFcLgA`
 
 func testByClient(client *Client) {
-	ok, err := client.ValidateJwt()
+	err := client.ValidateJwt()
 	if err != nil {
 		fmt.Println(err)
-	}
-	if ok {
-		fmt.Println("OK")
 	}
 
-	ok, err = client.CheckOperationByCode("不存在的操作")
+	err = client.ValidatePermOperationByCode("不存在的操作")
 	if err != nil {
 		fmt.Println(err)
-	}
-	if ok {
-		fmt.Println("OK")
 	}
 
-	ok, err = client.CheckOperationByCode("UCS_USER_LIST")
+	err = client.ValidatePermOperationByCode("UCS_USER_LIST")
 	if err != nil {
 		fmt.Println(err)
-	}
-	if ok {
-		fmt.Println("OK")
 	}
 
-	ok, err = client.CheckAction("ucs", "/api/v1/ucs/users", "get")
+	err = client.ValidatePermAction("ucs", "/api/v1/ucs/users", "get")
 	if err != nil {
 		fmt.Println(err)
-	}
-	if ok {
-		fmt.Println("OK")
 	}
 
-	ok, err = client.CheckOrgById("rererwerw")
+	err = client.ValidatePermOrgById("rererwerw")
 	if err != nil {
 		fmt.Println(err)
-	}
-	if ok {
-		fmt.Println("OK")
 	}
 
-	ok, err = client.CheckOrgById("c8fjca649b3hbmov5n60")
+	err = client.ValidatePermOrgById("c8fjca649b3hbmov5n60")
 	if err != nil {
 		fmt.Println(err)
-	}
-	if ok {
-		fmt.Println("OK")
 	}
 }
 
 func TestLocalValidator(t *testing.T) {
 	v := NewValidator([]byte(KEY))
-	ok, _, err := v.ValidateJwt(strings.TrimSpace(token))
-	fmt.Println(ok)
+	_, err := v.ValidateJwt(strings.TrimSpace(token))
 	fmt.Println(err)
 }
 
