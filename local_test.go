@@ -87,13 +87,13 @@ func TestLocalValidator(t *testing.T) {
 }
 
 func TestNormal(t *testing.T) {
-	client := NewClient("ucs", "localhost", 8919)
+	client := NewClient("localhost", 8919)
 	client.SetToken(token)
 	testByClient(client)
 }
 
 func TestTLS(t *testing.T) {
-	client := NewTLSClient([]byte(CERT), "ucs", "localhost", 8919)
+	client := NewTLSClient([]byte(CERT), "localhost", 8919)
 	client.SetToken(token)
 	testByClient(client)
 }

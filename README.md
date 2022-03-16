@@ -20,8 +20,8 @@ jwtUser, err := validator.ValidateJwt(token)
 
 ### 创建连接UCS的客户端
 ```
-client := NewClient("ucs", "your.domain.com", yourPort)
-// client := NewTLSClient(certFile, "ucs", "your.domain.com", yourPort) // TLS连接，需要UCS服务也同时开启
+client := NewClient("your.domain.com", yourPort)
+// client := NewTLSClient(certFile, "your.domain.com", yourPort) // TLS连接，需要UCS服务也同时开启
 client.SetToken(token)
 ```
 

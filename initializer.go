@@ -16,9 +16,8 @@ func NewValidator(publicKey []byte) *Validator {
 	return validator
 }
 
-func NewClient(service, addr string, port int) *Client {
+func NewClient(addr string, port int) *Client {
 	client := &Client{
-		service: service,
 		addr:    addr,
 		port:    port,
 		options: make([]grpc.DialOption, 0),
@@ -29,13 +28,12 @@ func NewClient(service, addr string, port int) *Client {
 	return client
 }
 
-func NewTLSClient(cert []byte, service, addr string, port int) *Client {
+func NewTLSClient(cert []byte, addr string, port int) *Client {
 	cp := x509.NewCertPool()
 	if !cp.AppendCertsFromPEM(cert) {
 		log.Fatalf("credentials: failed to append certificates")
 	}
 	client := &Client{
-		service: service,
 		addr:    addr,
 		port:    port,
 		options: make([]grpc.DialOption, 0),

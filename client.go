@@ -14,7 +14,6 @@ const (
 )
 
 type Client struct {
-	service string
 	addr    string
 	port    int
 	timeout int
