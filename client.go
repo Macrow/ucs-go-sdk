@@ -23,7 +23,9 @@ type Client struct {
 }
 
 func (c *Client) SetTimeout(timeout int) *Client {
-	c.timeout = timeout
+	if timeout > 0 {
+		c.timeout = timeout
+	}
 	return c
 }
 
