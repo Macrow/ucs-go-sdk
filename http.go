@@ -113,6 +113,9 @@ func (c *HttpClient) permitPost(url string, data map[string]string) error {
 	if result.Result.Permit {
 		return nil
 	}
+	if len(result.Message) > 0 {
+		return errors.New(result.Message)
+	}
 	return errors.New(DefaultNoPermMsg)
 }
 
