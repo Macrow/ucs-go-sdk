@@ -16,8 +16,8 @@ func NewValidator(publicKey []byte) *Validator {
 	return validator
 }
 
-func NewClient(addr string, port int) *Client {
-	client := &Client{
+func NewRpcClient(addr string, port int) Client {
+	client := &RpcClient{
 		addr:    addr,
 		port:    port,
 		options: make([]grpc.DialOption, 0),
@@ -28,12 +28,12 @@ func NewClient(addr string, port int) *Client {
 	return client
 }
 
-func NewTLSClient(cert []byte, addr string, port int) *Client {
+func NewTLSRpcClient(cert []byte, addr string, port int) Client {
 	cp := x509.NewCertPool()
 	if !cp.AppendCertsFromPEM(cert) {
 		log.Fatalf("credentials: failed to append certificates")
 	}
-	client := &Client{
+	client := &RpcClient{
 		addr:    addr,
 		port:    port,
 		options: make([]grpc.DialOption, 0),
@@ -41,5 +41,18 @@ func NewTLSClient(cert []byte, addr string, port int) *Client {
 	}
 	client.options = append(client.options, grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(cp, "")))
 
+	return client
+}
+
+func NewHttpClient(addr string, port int, ssl bool, accessCode string) Client {
+	client := &HttpClient{
+		addr:             addr,
+		port:             port,
+		ssl:              ssl,
+		accessCode:       accessCode,
+		accessCodeHeader: DefaultHeaderAccessCode,
+		randomKeyHeader:  DefaultHeaderRandomKey,
+		timeout:          DefaultTimeout,
+	}
 	return client
 }

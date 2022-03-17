@@ -46,9 +46,9 @@ CQIDAQAB
 -----END PUBLIC KEY-----
 `
 
-const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJleHAiOjE2Nzg5MzA2NjAsImlhdCI6MTY0NzM5NDY2MCwiaWQiOiJjOGZqYzl1NDliM2hibW92NWl1ZyIsImlzcyI6InVjcyIsIm5hbWUiOiJyb290In0.YVlCteAlS01LwxShyFXPlU_PTvaanRSwB1aZ78PMbr73cZabA-v7K9x3yz_LQJ9NKTUbnO_gLGxTVPgCwOR7hiyxy2QO5ZNxGOqJybJVe-1LfQ_zKIHzVKHBg3qZoRkcS-IbdfqQiSk_sfOlaWOsoMokEQvtsEXEt9g60b3sKz2UU5b57-0PUmZfawrE-3hsPTOk4APpQDmTZo2y609DHtTuozVNRXTsn7EE4ItPHBHp7ofJpUGrHbXj80Eu7G25aEkmlZw-oaQ06qH7O2VHjfTX1rjVCFALHXew8SPrRsuQrAjaoTWF-uCSaVZIqGDtzHjljeeBkG0K0Jr0lFcLgA`
+const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJleHAiOjE2NzkwMTY0MTksImlhdCI6MTY0NzQ4MDQxOSwiaWQiOiJjOGZqYzl1NDliM2hibW92NWl1ZyIsImlzcyI6InVjcyIsIm5hbWUiOiJyb290In0.s3OrSiOFMRZuyasDoUx7CZVk6t48WLtPHB0g7GUBm6Pc07NhHvqrorkm7SSd6WNvdX11Zz07EZPHQu3NvNl5cLAwUZUSBCgMj4iUGjD2MiJQknk8Hn7W_n5soGMWoJCbbZnMhk8TxGVqVsBBxSt4rKMX_g7XrCsFaPjHLhsECSgZOSDUcDccHlv0e89fyFuzxUJUCKhle7fhmBKoQdezO_w1nZDapD0IF9ltcErnmp1f8bEBZCQ4Pdf4yJ1L-D4_m8ImQ05uJycIhRMdsAZJ18AzgIupUcXUFcivluabOgx1eNDA2unQzUyq3XGm1EnCpWnOmZpnbH72H2vQ3JLdPQ`
 
-func testByClient(client *Client) {
+func testByClient(client Client) {
 	err := client.ValidateJwt()
 	if err != nil {
 		fmt.Println(err)
@@ -86,14 +86,26 @@ func TestLocalValidator(t *testing.T) {
 	fmt.Println(err)
 }
 
-func TestNormal(t *testing.T) {
-	client := NewClient("localhost", 8919)
+func TestRpcNormal(t *testing.T) {
+	client := NewRpcClient("localhost", 8919)
 	client.SetToken(token)
 	testByClient(client)
 }
 
-func TestTLS(t *testing.T) {
-	client := NewTLSClient([]byte(CERT), "localhost", 8919)
+func TestRpcTLS(t *testing.T) {
+	client := NewTLSRpcClient([]byte(CERT), "localhost", 8919)
+	client.SetToken(token)
+	testByClient(client)
+}
+
+func TestHttp(t *testing.T) {
+	client := NewHttpClient("localhost", 8019, false, "1A2B3C4D")
+	client.SetToken(token)
+	testByClient(client)
+}
+
+func TestTlsHttp(t *testing.T) {
+	client := NewHttpClient("localhost", 8019, true, "1A2B3C4D")
 	client.SetToken(token)
 	testByClient(client)
 }
