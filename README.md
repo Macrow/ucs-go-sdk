@@ -20,9 +20,9 @@ jwtUser, err := validator.ValidateJwt(token)
 
 ### 创建连接UCS的客户端
 ```
-client := NewRpcClient("your.domain.com", yourPort) // Rpc客户端
-// client := NewTLSRpcClient(certFile, "your.domain.com", yourPort) // TLS连接下的Rpc客户端，需要UCS服务也同时开启
-// client := NewHttpClient("your.domain.com", yourPort, false, yourAccessCode) // Http客户端
+client := NewRpcClient("your.domain.com:port") // Rpc客户端
+// client := NewTLSRpcClient(certFile, "your.domain.com:port") // TLS连接下的Rpc客户端，需要UCS服务也同时开启
+// client := NewHttpClient("https://your.domain.com:port", yourAccessCode) // Http客户端
 client.SetToken(token)
 ```
 
