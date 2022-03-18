@@ -10,9 +10,7 @@ import (
 )
 
 type HttpClient struct {
-	addr             string
-	port             int
-	ssl              bool
+	baseUrl          string
 	timeout          int
 	token            string
 	accessCodeHeader string
@@ -124,14 +122,10 @@ func (c *HttpClient) getAgent() (*req.Client, error) {
 		return nil, errors.New("please provide token")
 	}
 	if c.agent == nil {
-		ssl := ""
-		if c.ssl {
-			ssl = "s"
-		}
 		c.agent = req.C().
 			DisableAutoDecode().
 			SetAutoDecodeContentType("application/json").
-			SetBaseURL(fmt.Sprintf("http%v://%v:%d", ssl, c.addr, c.port))
+			SetBaseURL(c.baseUrl)
 	}
 	c.agent.
 		SetTimeout(time.Duration(c.timeout)*time.Second).

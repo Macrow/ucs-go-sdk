@@ -11,7 +11,6 @@ import (
 
 type RpcClient struct {
 	addr    string
-	port    int
 	timeout int
 
 	options []grpc.DialOption
@@ -71,7 +70,7 @@ func authentication(c *RpcClient) error {
 		return fmt.Errorf("please create client instance and set token first")
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%v:%d", c.addr, c.port), c.options...)
+	conn, err := grpc.Dial(c.addr, c.options...)
 	defer func() {
 		if conn != nil {
 			_ = conn.Close()
@@ -102,7 +101,7 @@ func authorization(c *RpcClient, req *pb.AuthorizationRequest) error {
 		return fmt.Errorf("please create client instance first")
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%v:%d", c.addr, c.port), c.options...)
+	conn, err := grpc.Dial(c.addr, c.options...)
 	defer func() {
 		if conn != nil {
 			_ = conn.Close()

@@ -87,25 +87,25 @@ func TestLocalValidator(t *testing.T) {
 }
 
 func TestRpcNormal(t *testing.T) {
-	client := NewRpcClient("localhost", 8919)
+	client := NewRpcClient("localhost:8919")
 	client.SetToken(token)
 	testByClient(client)
 }
 
 func TestRpcTLS(t *testing.T) {
-	client := NewTLSRpcClient([]byte(CERT), "localhost", 8919)
+	client := NewTLSRpcClient([]byte(CERT), "localhost:8919")
 	client.SetToken(token)
 	testByClient(client)
 }
 
 func TestHttp(t *testing.T) {
-	client := NewHttpClient("localhost", 8019, false, "1A2B3C4D")
+	client := NewHttpClient("http://localhost:8019", "1A2B3C4D")
 	client.SetToken(token)
 	testByClient(client)
 }
 
 func TestTlsHttp(t *testing.T) {
-	client := NewHttpClient("localhost", 8019, true, "1A2B3C4D")
+	client := NewHttpClient("https://localhost:8019", "1A2B3C4D")
 	client.SetToken(token)
 	testByClient(client)
 }
