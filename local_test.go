@@ -46,7 +46,7 @@ CQIDAQAB
 -----END PUBLIC KEY-----
 `
 
-const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJleHAiOjE2NzkwMTY0MTksImlhdCI6MTY0NzQ4MDQxOSwiaWQiOiJjOGZqYzl1NDliM2hibW92NWl1ZyIsImlzcyI6InVjcyIsIm5hbWUiOiJyb290In0.s3OrSiOFMRZuyasDoUx7CZVk6t48WLtPHB0g7GUBm6Pc07NhHvqrorkm7SSd6WNvdX11Zz07EZPHQu3NvNl5cLAwUZUSBCgMj4iUGjD2MiJQknk8Hn7W_n5soGMWoJCbbZnMhk8TxGVqVsBBxSt4rKMX_g7XrCsFaPjHLhsECSgZOSDUcDccHlv0e89fyFuzxUJUCKhle7fhmBKoQdezO_w1nZDapD0IF9ltcErnmp1f8bEBZCQ4Pdf4yJ1L-D4_m8ImQ05uJycIhRMdsAZJ18AzgIupUcXUFcivluabOgx1eNDA2unQzUyq3XGm1EnCpWnOmZpnbH72H2vQ3JLdPQ`
+const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY3OTMwMDg3NCwiaWF0IjoxNjQ3NzY0ODc0LCJpZCI6ImM4ZmpjOXU0OWIzaGJtb3Y1aXVnIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.fKS0C0Slk44AliHPplgPI5e9gXceSdJQ81mDmxF9yj-uyrRgTwt_7vthKQsWlXSZ1yiBiRvqYgxWGU4oZRAMyccbEiMhlZyrX720OApsWWIHkpOAEU6q_DGACtW7lmn1xhVkjGRfv4NRzeFQ1-bGXWe2qROPuI7SoO7SLvRfUeW1TD0ai0bsfzZ34odW9rhpPQlePXZRx8QVzfmc2SqbKJ6_-V5bfKSa9-89UvFMt5lvC9wq8jNBYxtAzXg6LZT8_TPTmDachmhBm2jXeojG1pmWSA_29W9ujvenU46USKhCwndxHdlm_7cZu8Kbu8XgCsvimFQARhMDlK3jh0mJQA`
 
 func testByClient(client Client) {
 	err := client.ValidateJwt()
@@ -78,6 +78,12 @@ func testByClient(client Client) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	token, err := client.RenewToken()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(token)
 }
 
 func TestLocalValidator(t *testing.T) {

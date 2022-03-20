@@ -8,4 +8,5 @@ type Client interface {
 	ValidatePermOperationByCode(operationCode string) error
 	ValidatePermAction(service, path, method string) error
 	ValidatePermOrgById(orgId string) error
+	RenewToken() (string, error)
 }

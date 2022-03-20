@@ -35,6 +35,16 @@ type PermitHttpResponse struct {
 	Result  CommonPermitResult `json:"result"`
 }
 
+type CommonRenewTokenResult struct {
+	Token string `json:"token"`
+}
+
+type RenewTokenHttpResponse struct {
+	Code    int                    `json:"code"`
+	Message string                 `json:"message"`
+	Result  CommonRenewTokenResult `json:"result"`
+}
+
 func (c *HttpClient) SetTimeout(timeout int) Client {
 	if timeout > 0 {
 		c.timeout = timeout
@@ -91,6 +101,27 @@ func (c *HttpClient) ValidatePermOrgById(orgId string) error {
 	return c.permitPost(ValidatePermOrgByIdURL, map[string]string{
 		"id": orgId,
 	})
+}
+
+func (c *HttpClient) RenewToken() (string, error) {
+	a, err := c.getAgent()
+	if err != nil {
+		return "", err
+	}
+	result := &RenewTokenHttpResponse{}
+	res, err := a.R().SetResult(result).
+		SetFormData(map[string]string{"token": c.token}).
+		Post(ValidateRenewTokenURL)
+	if err != nil {
+		return "", err
+	}
+	if !res.IsSuccess() {
+		return "", fmt.Errorf("error: %v", res)
+	}
+	if result.Code == 0 {
+		return result.Result.Token, nil
+	}
+	return "", errors.New(result.Message)
 }
 
 func (c *HttpClient) permitPost(url string, data map[string]string) error {

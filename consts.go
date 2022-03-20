@@ -10,4 +10,5 @@ const (
 	ValidatePermOperationByCodeURL = "/api/v1/ucs/current/check-operation"
 	ValidatePermActionURL          = "/api/v1/ucs/current/check-action"
 	ValidatePermOrgByIdURL         = "/api/v1/ucs/current/check-org"
+	ValidateRenewTokenURL          = "/api/v1/ucs/public/renew-token"
 )

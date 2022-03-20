@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthServiceClient interface {
 	Authentication(ctx context.Context, in *AuthenticationRequest, opts ...grpc.CallOption) (*Result, error)
 	Authorization(ctx context.Context, in *AuthorizationRequest, opts ...grpc.CallOption) (*Result, error)
+	RenewToken(ctx context.Context, in *RenewTokenRequest, opts ...grpc.CallOption) (*RenewTokenResult, error)
 }
 
 type authServiceClient struct {
@@ -48,12 +49,22 @@ func (c *authServiceClient) Authorization(ctx context.Context, in *Authorization
 	return out, nil
 }
 
+func (c *authServiceClient) RenewToken(ctx context.Context, in *RenewTokenRequest, opts ...grpc.CallOption) (*RenewTokenResult, error) {
+	out := new(RenewTokenResult)
+	err := c.cc.Invoke(ctx, "/pb.AuthService/RenewToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
 type AuthServiceServer interface {
 	Authentication(context.Context, *AuthenticationRequest) (*Result, error)
 	Authorization(context.Context, *AuthorizationRequest) (*Result, error)
+	RenewToken(context.Context, *RenewTokenRequest) (*RenewTokenResult, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedAuthServiceServer) Authentication(context.Context, *Authentic
 }
 func (UnimplementedAuthServiceServer) Authorization(context.Context, *AuthorizationRequest) (*Result, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authorization not implemented")
+}
+func (UnimplementedAuthServiceServer) RenewToken(context.Context, *RenewTokenRequest) (*RenewTokenResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenewToken not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -116,6 +130,24 @@ func _AuthService_Authorization_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_RenewToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenewTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).RenewToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.AuthService/RenewToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).RenewToken(ctx, req.(*RenewTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +162,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authorization",
 			Handler:    _AuthService_Authorization_Handler,
+		},
+		{
+			MethodName: "RenewToken",
+			Handler:    _AuthService_RenewToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

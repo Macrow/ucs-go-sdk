@@ -65,6 +65,37 @@ func (c *RpcClient) ValidatePermOrgById(orgId string) error {
 	})
 }
 
+func (c *RpcClient) RenewToken() (string, error) {
+	if c.options == nil {
+		return "", fmt.Errorf("please create client instance and set token first")
+	}
+
+	conn, err := grpc.Dial(c.addr, c.options...)
+	defer func() {
+		if conn != nil {
+			_ = conn.Close()
+		}
+	}()
+	if err != nil {
+		return "", fmt.Errorf(err.Error())
+	}
+
+	service := pb.NewAuthServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.timeout))
+	defer cancel()
+	ctx = metadata.NewOutgoingContext(ctx, c.md)
+
+	res, err := service.RenewToken(ctx, &pb.RenewTokenRequest{})
+	if err != nil {
+		return "", fmt.Errorf(err.Error())
+	}
+	if !res.Success {
+		return "", fmt.Errorf(res.Message)
+	}
+	return res.Token, nil
+}
+
 func authentication(c *RpcClient) error {
 	if c.options == nil {
 		return fmt.Errorf("please create client instance and set token first")
@@ -91,7 +122,7 @@ func authentication(c *RpcClient) error {
 		return fmt.Errorf(err.Error())
 	}
 	if !res.Success {
-		return fmt.Errorf(res.Error.Reason)
+		return fmt.Errorf(res.Message)
 	}
 	return nil
 }
@@ -122,7 +153,7 @@ func authorization(c *RpcClient, req *pb.AuthorizationRequest) error {
 		return fmt.Errorf(err.Error())
 	}
 	if !res.Success {
-		return fmt.Errorf(res.Error.Reason)
+		return fmt.Errorf(res.Message)
 	}
 	return nil
 }
