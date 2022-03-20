@@ -26,11 +26,6 @@ client := NewRpcClient("your.domain.com:port") // Rpc客户端
 client.SetToken(token)
 ```
 
-### 如果令牌过期了，重新申请令牌
-```
-token, err := client.RenewToken()
-```
-
 ### UCS服务端验证Jwt
 ```
 err := client.ValidateJwt()

@@ -78,12 +78,6 @@ func testByClient(client Client) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	token, err := client.RenewToken()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(token)
 }
 
 func TestLocalValidator(t *testing.T) {

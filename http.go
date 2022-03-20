@@ -103,27 +103,6 @@ func (c *HttpClient) ValidatePermOrgById(orgId string) error {
 	})
 }
 
-func (c *HttpClient) RenewToken() (string, error) {
-	a, err := c.getAgent()
-	if err != nil {
-		return "", err
-	}
-	result := &RenewTokenHttpResponse{}
-	res, err := a.R().SetResult(result).
-		SetFormData(map[string]string{"token": c.token}).
-		Post(ValidateRenewTokenURL)
-	if err != nil {
-		return "", err
-	}
-	if !res.IsSuccess() {
-		return "", fmt.Errorf("error: %v", res)
-	}
-	if result.Code == 0 {
-		return result.Result.Token, nil
-	}
-	return "", errors.New(result.Message)
-}
-
 func (c *HttpClient) permitPost(url string, data map[string]string) error {
 	a, err := c.getAgent()
 	if err != nil {
