@@ -126,14 +126,5 @@ func ValidateJwt(publicKey []byte, tokenString string) (*JwtUser, error) {
 }
 
 func IsSame(u1 *RawJwtUser, u2 *RawJwtUser) bool {
-	if strings.Compare(u1.Id, u2.Id) == 0 &&
-		strings.Compare(u1.Name, u2.Name) == 0 &&
-		strings.Compare(u1.DeviceId, u2.DeviceId) == 0 &&
-		strings.Compare(u1.DeviceName, u2.DeviceName) == 0 &&
-		strings.Compare(u1.Issuer, u2.Issuer) == 0 &&
-		u1.IssueAt == u2.IssueAt &&
-		u1.ExpireAt == u2.ExpireAt {
-		return true
-	}
-	return false
+	return strings.Compare(u1.Id, u2.Id) == 0 && u1.IssueAt == u2.IssueAt
 }
