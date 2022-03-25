@@ -35,6 +35,17 @@ type PermitHttpResponse struct {
 	Result  CommonPermitResult `json:"result"`
 }
 
+type CurrentQueryActionOrgIdsRes struct {
+	OrgPermissionType string   `json:"orgPermissionType"`
+	OrgIds            []string `json:"orgIds"`
+}
+
+type QueryActionOrgIdsHttpResponse struct {
+	Code    int                         `json:"code"`
+	Message string                      `json:"message"`
+	Result  CurrentQueryActionOrgIdsRes `json:"result"`
+}
+
 type CommonRenewTokenResult struct {
 	Token string `json:"token"`
 }
@@ -101,6 +112,40 @@ func (c *HttpClient) ValidatePermOrgById(orgId string) error {
 	return c.permitPost(ValidatePermOrgByIdURL, map[string]string{
 		"id": orgId,
 	})
+}
+
+func (c *HttpClient) ValidatePermActionWithOrgId(service, path, method, orgId string) error {
+	return c.permitPost(ValidatePermActionWithOrgIdURL, map[string]string{
+		"service": service,
+		"path":    path,
+		"method":  method,
+		"orgId":   orgId,
+	})
+}
+
+func (c *HttpClient) QueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error) {
+	a, err := c.getAgent()
+	if err != nil {
+		return nil, err
+	}
+	result := &QueryActionOrgIdsHttpResponse{}
+	res, err := a.R().SetResult(result).
+		SetFormData(map[string]string{
+			"service": service,
+			"path":    path,
+			"method":  method,
+		}).
+		Post(QueryOrgIdsByActionURL)
+	if err != nil {
+		return nil, err
+	}
+	if !res.IsSuccess() {
+		return nil, fmt.Errorf("error: %v", res)
+	}
+	return &ActionOrgIds{
+		orgPermissionType: OrgPermissionType(result.Result.OrgPermissionType),
+		orgIds:            result.Result.OrgIds,
+	}, nil
 }
 
 func (c *HttpClient) permitPost(url string, data map[string]string) error {

@@ -8,4 +8,6 @@ type Client interface {
 	ValidatePermOperationByCode(operationCode string) error
 	ValidatePermAction(service, path, method string) error
 	ValidatePermOrgById(orgId string) error
+	ValidatePermActionWithOrgId(service, path, method, orgId string) error
+	QueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error)
 }

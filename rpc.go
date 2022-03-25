@@ -65,6 +65,60 @@ func (c *RpcClient) ValidatePermOrgById(orgId string) error {
 	})
 }
 
+func (c *RpcClient) ValidatePermActionWithOrgId(service, path, method, orgId string) error {
+	return authorization(c, &pb.AuthorizationRequest{
+		Payload: &pb.AuthorizationRequest_ActionWithOrgId{
+			ActionWithOrgId: &pb.ActionWithOrgId{
+				Action: &pb.Action{
+					Service: service,
+					Path:    path,
+					Method:  method,
+				},
+				OrgId: orgId,
+			},
+		},
+	})
+}
+
+func (c *RpcClient) QueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error) {
+	if c.options == nil {
+		return nil, fmt.Errorf("please create client instance first")
+	}
+
+	conn, err := grpc.Dial(c.addr, c.options...)
+	defer func() {
+		if conn != nil {
+			_ = conn.Close()
+		}
+	}()
+
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
+	}
+	client := pb.NewAuthServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.timeout))
+	defer cancel()
+	ctx = metadata.NewOutgoingContext(ctx, c.md)
+
+	res, err := client.Authorization(ctx, &pb.AuthorizationRequest{
+		Payload: &pb.AuthorizationRequest_OrgIdsByAction{
+			OrgIdsByAction: &pb.Action{
+				Service: service,
+				Path:    path,
+				Method:  method,
+			},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
+	}
+	return &ActionOrgIds{
+		orgPermissionType: OrgPermissionType(res.GetOrgIds().GetOrgPermissionType()),
+		orgIds:            res.GetOrgIds().GetOrgIds(),
+	}, nil
+}
+
 func authentication(c *RpcClient) error {
 	if c.options == nil {
 		return fmt.Errorf("please create client instance and set token first")
@@ -80,13 +134,13 @@ func authentication(c *RpcClient) error {
 		return fmt.Errorf(err.Error())
 	}
 
-	service := pb.NewAuthServiceClient(conn)
+	client := pb.NewAuthServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.timeout))
 	defer cancel()
 	ctx = metadata.NewOutgoingContext(ctx, c.md)
 
-	res, err := service.Authentication(ctx, &pb.AuthenticationRequest{})
+	res, err := client.Authentication(ctx, &pb.AuthenticationRequest{})
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
@@ -111,13 +165,13 @@ func authorization(c *RpcClient, req *pb.AuthorizationRequest) error {
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
-	service := pb.NewAuthServiceClient(conn)
+	client := pb.NewAuthServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.timeout))
 	defer cancel()
 	ctx = metadata.NewOutgoingContext(ctx, c.md)
 
-	res, err := service.Authorization(ctx, req)
+	res, err := client.Authorization(ctx, req)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}

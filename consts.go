@@ -1,6 +1,19 @@
 package ucs
 
+type OrgPermissionType string
+
+type ActionOrgIds struct {
+	orgPermissionType OrgPermissionType
+	orgIds            []string
+}
+
 const (
+	OrgPermissionTypeTree   OrgPermissionType = "tree"
+	OrgPermissionTypeSelf   OrgPermissionType = "self"
+	OrgPermissionTypeNone   OrgPermissionType = "none"
+	OrgPermissionTypeAll    OrgPermissionType = "all"
+	OrgPermissionTypeCustom OrgPermissionType = "custom"
+
 	DefaultHeaderRandomKey  = "Random-Key"
 	DefaultHeaderAccessCode = "Access-Code"
 	DefaultNoPermMsg        = "权限不足"
@@ -10,5 +23,6 @@ const (
 	ValidatePermOperationByCodeURL = "/api/v1/ucs/current/check-operation"
 	ValidatePermActionURL          = "/api/v1/ucs/current/check-action"
 	ValidatePermOrgByIdURL         = "/api/v1/ucs/current/check-org"
-	ValidateRenewTokenURL          = "/api/v1/ucs/public/renew-token"
+	ValidatePermActionWithOrgIdURL = "/api/v1/ucs/current/check-action-with-org-id"
+	QueryOrgIdsByActionURL         = "/api/v1/ucs/current/query-action-org-ids"
 )

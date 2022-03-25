@@ -46,7 +46,7 @@ CQIDAQAB
 -----END PUBLIC KEY-----
 `
 
-const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY3OTMwMDg3NCwiaWF0IjoxNjQ3NzY0ODc0LCJpZCI6ImM4ZmpjOXU0OWIzaGJtb3Y1aXVnIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.fKS0C0Slk44AliHPplgPI5e9gXceSdJQ81mDmxF9yj-uyrRgTwt_7vthKQsWlXSZ1yiBiRvqYgxWGU4oZRAMyccbEiMhlZyrX720OApsWWIHkpOAEU6q_DGACtW7lmn1xhVkjGRfv4NRzeFQ1-bGXWe2qROPuI7SoO7SLvRfUeW1TD0ai0bsfzZ34odW9rhpPQlePXZRx8QVzfmc2SqbKJ6_-V5bfKSa9-89UvFMt5lvC9wq8jNBYxtAzXg6LZT8_TPTmDachmhBm2jXeojG1pmWSA_29W9ujvenU46USKhCwndxHdlm_7cZu8Kbu8XgCsvimFQARhMDlK3jh0mJQA`
+const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY3OTc1NTc5NCwiaWF0IjoxNjQ4MjE5Nzk0LCJpZCI6ImM4dXRkMDdrb2JqaDFidGQxanAwIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.HNiEyVm_JVBMDFbVbaV27vkqix99PFfCO17ekW6EEprjJTggfOHKJV5BOLNOVXKHGT3zF4gJE8EK0E5KDmxIICExzRVbk7lQ9vdXFFRvsVMxX_YUyyk5Q0CZYAtmqLX5XrApAUWQjg4aD69xmdDN5E0TfqgmlTsVfwLtdBboIUVABUR3S-Z4xepO9Gurst1HEsOhLTUIHfTnawinGQJdR8rwROA7EBuDWEKEYIn1QjYX_f49n-eqTiPaN9kpayeLukm4UdWdl40Uj5MJUgBG_eynszXAjsRyMKiK208QmKloGuOqnqguaVmU4oz7H5ZE8t6DeVjLQZv5COga0SGw9A`
 
 func testByClient(client Client) {
 	err := client.ValidateJwt()
@@ -78,6 +78,23 @@ func testByClient(client Client) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	err = client.ValidatePermActionWithOrgId("ucs", "/api/v1/ucs/users", "get", "c8fjca649b3hbmov5n60")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = client.ValidatePermActionWithOrgId("ucs", "/api/v1/ucs/users", "get", "234sdfsdja")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	res, err := client.QueryOrgIdsByAction("ucs", "/api/v1/ucs/users", "get")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res.orgPermissionType)
+	fmt.Println(res.orgIds)
 }
 
 func TestLocalValidator(t *testing.T) {
