@@ -85,7 +85,7 @@ func ValidateJwt(publicKey []byte, tokenString string) (*JwtUser, error) {
 		return nil, errors.New(JwtErrInternal)
 	}
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+		if method, ok := t.Method.(*jwt.SigningMethodRSA); !ok || method.Alg() != "RS256" {
 			return nil, errors.New(JwtErrFormat)
 		}
 		return key, nil
@@ -126,5 +126,5 @@ func ValidateJwt(publicKey []byte, tokenString string) (*JwtUser, error) {
 }
 
 func IsSame(u1 *RawJwtUser, u2 *RawJwtUser) bool {
-	return strings.Compare(u1.Id, u2.Id) == 0 && u1.IssueAt == u2.IssueAt
+	return u1.Id == u2.Id && u1.IssueAt == u2.IssueAt
 }
