@@ -55,48 +55,33 @@ func testByClient(client Client) {
 	}
 
 	err = client.ValidatePermOperationByCode("不存在的操作")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	err = client.ValidatePermOperationByCode("UCS_USER_LIST")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	err = client.ValidatePermAction("ucs", "/api/v1/ucs/users", "get")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	err = client.ValidatePermOrgById("rererwerw")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	err = client.ValidatePermOrgById("c8fjca649b3hbmov5n60")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	err = client.ValidatePermActionWithOrgId("ucs", "/api/v1/ucs/users", "get", "c8fjca649b3hbmov5n60")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	err = client.ValidatePermActionWithOrgId("ucs", "/api/v1/ucs/users", "get", "234sdfsdja")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 
 	res, err := client.QueryOrgIdsByAction("ucs", "/api/v1/ucs/users", "get")
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Println(err)
 	fmt.Println(res.orgPermissionType)
 	fmt.Println(res.orgIds)
 
 	newToken, err := client.OAuth2TokenByPassword("root", "123456", "test", "ucs-go-sdk")
+	fmt.Println(err)
 	fmt.Println(newToken)
 }
 
