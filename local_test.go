@@ -46,7 +46,7 @@ CQIDAQAB
 -----END PUBLIC KEY-----
 `
 
-const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY3OTc1NTc5NCwiaWF0IjoxNjQ4MjE5Nzk0LCJpZCI6ImM4dXRkMDdrb2JqaDFidGQxanAwIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.HNiEyVm_JVBMDFbVbaV27vkqix99PFfCO17ekW6EEprjJTggfOHKJV5BOLNOVXKHGT3zF4gJE8EK0E5KDmxIICExzRVbk7lQ9vdXFFRvsVMxX_YUyyk5Q0CZYAtmqLX5XrApAUWQjg4aD69xmdDN5E0TfqgmlTsVfwLtdBboIUVABUR3S-Z4xepO9Gurst1HEsOhLTUIHfTnawinGQJdR8rwROA7EBuDWEKEYIn1QjYX_f49n-eqTiPaN9kpayeLukm4UdWdl40Uj5MJUgBG_eynszXAjsRyMKiK208QmKloGuOqnqguaVmU4oz7H5ZE8t6DeVjLQZv5COga0SGw9A`
+const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY4MDI0NzM0NiwiaWF0IjoxNjQ4NzExMzQ2LCJpZCI6ImM5Mmxjb2Zrb2JqazFwc3JsZm8wIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.GiPVB1xumTXx-HrhliT12vRpFb0FeKz0kLJ0uIjwRffHGQjMeyQezh3GPt2Mx7ZDOAknjVA9mJ-aA7SOogjRTQezU0qfAFN1I6T8Xk6Lw9SzvRZUTH3-vwBrAxHC2MI9SMY2_hPFKL9PiEWnbtOo3uT-KPYwERydOS_EfuroyHjyKviJaNOVOFBSflTrl8avOGKOZzCuDY0yHQVxCIt4qjAGPxoC-EBzEmWagKughaWCFQyT-fK_X7c8_5GzLgktNl0sxOkFb1i8futogExNDNyq0A6lFZKkT9k5gDiliLixx9shSvC1NR3o58fYfVKoLrbjxoVruPu0yUv2noytJA`
 
 func testByClient(client Client) {
 	err := client.ValidateJwt()
@@ -95,6 +95,9 @@ func testByClient(client Client) {
 	}
 	fmt.Println(res.orgPermissionType)
 	fmt.Println(res.orgIds)
+
+	newToken, err := client.OAuth2TokenByPassword("root", "123456", "test", "ucs-go-sdk")
+	fmt.Println(newToken)
 }
 
 func TestLocalValidator(t *testing.T) {

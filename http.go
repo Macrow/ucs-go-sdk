@@ -46,6 +46,16 @@ type QueryActionOrgIdsHttpResponse struct {
 	Result  CurrentQueryActionOrgIdsRes `json:"result"`
 }
 
+type OAuth2TokenRes struct {
+	AccessToken string `json:"accessToken"`
+}
+
+type OAuth2TokenResponse struct {
+	Code    int            `json:"code"`
+	Message string         `json:"message"`
+	Result  OAuth2TokenRes `json:"result"`
+}
+
 type CommonRenewTokenResult struct {
 	Token string `json:"token"`
 }
@@ -146,6 +156,44 @@ func (c *HttpClient) QueryOrgIdsByAction(service, path, method string) (*ActionO
 		orgPermissionType: OrgPermissionType(result.Result.OrgPermissionType),
 		orgIds:            result.Result.OrgIds,
 	}, nil
+}
+
+func (c *HttpClient) OAuth2TokenByAuthorizationCode(code, clientId, clientSecret, deviceId, deviceName string) (string, error) {
+	return c.oAuthToken(map[string]string{
+		"grantType":    "authorization_code",
+		"code":         code,
+		"clientId":     clientId,
+		"clientSecret": clientSecret,
+		"deviceId":     deviceId,
+		"deviceName":   deviceName,
+	})
+}
+
+func (c *HttpClient) OAuth2TokenByPassword(username, password, deviceId, deviceName string) (string, error) {
+	return c.oAuthToken(map[string]string{
+		"grantType":  "password",
+		"username":   username,
+		"password":   password,
+		"deviceId":   deviceId,
+		"deviceName": deviceName,
+	})
+}
+
+func (c *HttpClient) oAuthToken(data map[string]string) (string, error) {
+	a, err := c.getAgent()
+	if err != nil {
+		return "", err
+	}
+	result := &OAuth2TokenResponse{}
+	res, err := a.R().SetResult(result).
+		SetFormData(data).Post(OAuth2TokenURL)
+	if err != nil {
+		return "", err
+	}
+	if !res.IsSuccess() {
+		return "", fmt.Errorf("error: %v", res)
+	}
+	return result.Result.AccessToken, nil
 }
 
 func (c *HttpClient) permitPost(url string, data map[string]string) error {

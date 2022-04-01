@@ -119,6 +119,61 @@ func (c *RpcClient) QueryOrgIdsByAction(service, path, method string) (*ActionOr
 	}, nil
 }
 
+func (c *RpcClient) OAuth2TokenByAuthorizationCode(code, clientId, clientSecret, deviceId, deviceName string) (string, error) {
+	return c.oAuth2Token(&pb.OAuth2TokenRequest{
+		Payload: &pb.OAuth2TokenRequest_AuthorizationCode{
+			AuthorizationCode: &pb.AuthorizationCode{
+				Code:         code,
+				ClientId:     clientId,
+				ClientSecret: clientSecret,
+				DeviceId:     deviceId,
+				DeviceName:   deviceName,
+			},
+		},
+	})
+}
+
+func (c *RpcClient) OAuth2TokenByPassword(username, password, deviceId, deviceName string) (string, error) {
+	return c.oAuth2Token(&pb.OAuth2TokenRequest{
+		Payload: &pb.OAuth2TokenRequest_PasswordCredentials{
+			PasswordCredentials: &pb.PasswordCredentials{
+				Username:   username,
+				Password:   password,
+				DeviceId:   deviceId,
+				DeviceName: deviceName,
+			},
+		},
+	})
+}
+
+func (c *RpcClient) oAuth2Token(request *pb.OAuth2TokenRequest) (string, error) {
+	if c.options == nil {
+		return "", fmt.Errorf("please create client instance first")
+	}
+
+	conn, err := grpc.Dial(c.addr, c.options...)
+	defer func() {
+		if conn != nil {
+			_ = conn.Close()
+		}
+	}()
+
+	if err != nil {
+		return "", fmt.Errorf(err.Error())
+	}
+	client := pb.NewAuthServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.timeout))
+	defer cancel()
+	ctx = metadata.NewOutgoingContext(ctx, c.md)
+
+	res, err := client.OAuth2Token(ctx, request)
+	if err != nil {
+		return "", fmt.Errorf(err.Error())
+	}
+	return res.AccessToken, nil
+}
+
 func authentication(c *RpcClient) error {
 	if c.options == nil {
 		return fmt.Errorf("please create client instance and set token first")

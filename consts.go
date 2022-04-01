@@ -25,4 +25,5 @@ const (
 	ValidatePermOrgByIdURL         = "/api/v1/ucs/current/check-org"
 	ValidatePermActionWithOrgIdURL = "/api/v1/ucs/current/check-action-with-org-id"
 	QueryOrgIdsByActionURL         = "/api/v1/ucs/current/query-action-org-ids"
+	OAuth2TokenURL                 = "/api/v1/ucs/oauth2/token"
 )
