@@ -1,69 +1,29 @@
 package ucs
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/imroc/req/v3"
 	"math/rand"
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type HttpClient struct {
-	baseUrl          string
-	timeout          int
-	token            string
-	accessCodeHeader string
-	accessCode       string
-	randomKeyHeader  string
-	agent            *req.Client
-}
-
-type NormalHttpResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Result  interface{} `json:"result"`
-}
-
-type CommonPermitResult struct {
-	Permit bool `json:"permit"`
-}
-
-type PermitHttpResponse struct {
-	Code    int                `json:"code"`
-	Message string             `json:"message"`
-	Result  CommonPermitResult `json:"result"`
-}
-
-type CurrentQueryActionOrgIdsRes struct {
-	OrgPermissionType string   `json:"orgPermissionType"`
-	OrgIds            []string `json:"orgIds"`
-}
-
-type QueryActionOrgIdsHttpResponse struct {
-	Code    int                         `json:"code"`
-	Message string                      `json:"message"`
-	Result  CurrentQueryActionOrgIdsRes `json:"result"`
-}
-
-type OAuth2TokenRes struct {
-	AccessToken string `json:"accessToken"`
-}
-
-type OAuth2TokenResponse struct {
-	Code    int            `json:"code"`
-	Message string         `json:"message"`
-	Result  OAuth2TokenRes `json:"result"`
-}
-
-type CommonRenewTokenResult struct {
-	Token string `json:"token"`
-}
-
-type RenewTokenHttpResponse struct {
-	Code    int                    `json:"code"`
-	Message string                 `json:"message"`
-	Result  CommonRenewTokenResult `json:"result"`
+	baseUrl           string
+	timeout           int
+	userToken         string
+	clientId          string
+	clientSecret      string
+	accessCode        string
+	accessCodeHeader  string
+	randomKeyHeader   string
+	userTokenHeader   string
+	clientTokenHeader string
+	agent             *req.Client
 }
 
 func (c *HttpClient) SetTimeout(timeout int) Client {
@@ -73,44 +33,59 @@ func (c *HttpClient) SetTimeout(timeout int) Client {
 	return c
 }
 
-func (c *HttpClient) SetToken(token string) Client {
-	c.token = token
+func (c *HttpClient) SetUserToken(userToken string) Client {
+	c.userToken = userToken
 	return c
 }
 
-func (c *HttpClient) SetHttpHeaderNames(accessCodeHeader, randomKeyHeader string) Client {
-	c.accessCodeHeader = accessCodeHeader
-	c.randomKeyHeader = randomKeyHeader
+func (c *HttpClient) SetClientIdAndSecret(clientId, clientSecret string) Client {
+	c.clientId = clientId
+	c.clientSecret = clientSecret
 	return c
 }
 
-func (c *HttpClient) ValidateJwt() error {
-	a, err := c.getAgent()
-	if err != nil {
-		return err
+func (c *HttpClient) SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userTokenHeader, clientTokenHeader string) Client {
+	if len(accessCodeHeader) > 0 {
+		c.accessCodeHeader = accessCodeHeader
 	}
-	result := &NormalHttpResponse{}
-	res, err := a.R().SetResult(result).
-		Get(ValidateJwtURL)
+	if len(randomKeyHeader) > 0 {
+		c.randomKeyHeader = randomKeyHeader
+	}
+	if len(userTokenHeader) > 0 {
+		c.userTokenHeader = userTokenHeader
+	}
+	if len(userTokenHeader) > 0 {
+		c.clientTokenHeader = clientTokenHeader
+	}
+	return c
+}
+
+func (c *HttpClient) UserValidateJwt() (*JwtUser, error) {
+	a, err := c.getUserAgent()
 	if err != nil {
-		return err
+		return nil, err
+	}
+	result := &ValidateJwtHttpResponse{}
+	res, err := a.R().SetResult(result).Get(ValidateJwtURL)
+	if err != nil {
+		return nil, err
 	}
 	if !res.IsSuccess() {
-		return fmt.Errorf("error: %v", res)
+		return nil, fmt.Errorf("error: %v", res)
 	}
 	if result.Code == 0 {
-		return nil
+		return &JwtUser{RawJwtUser: result.Result, Token: c.userToken}, nil
 	}
-	return errors.New(result.Message)
+	return nil, errors.New(result.Message)
 }
 
-func (c *HttpClient) ValidatePermOperationByCode(operationCode string) error {
+func (c *HttpClient) UserValidatePermOperationByCode(operationCode string) error {
 	return c.permitPost(ValidatePermOperationByCodeURL, map[string]string{
 		"code": operationCode,
 	})
 }
 
-func (c *HttpClient) ValidatePermAction(service, path, method string) error {
+func (c *HttpClient) UserValidatePermAction(service, path, method string) error {
 	return c.permitPost(ValidatePermActionURL, map[string]string{
 		"service": service,
 		"path":    path,
@@ -118,13 +93,13 @@ func (c *HttpClient) ValidatePermAction(service, path, method string) error {
 	})
 }
 
-func (c *HttpClient) ValidatePermOrgById(orgId string) error {
+func (c *HttpClient) UserValidatePermOrgById(orgId string) error {
 	return c.permitPost(ValidatePermOrgByIdURL, map[string]string{
 		"id": orgId,
 	})
 }
 
-func (c *HttpClient) ValidatePermActionWithOrgId(service, path, method, orgId string) error {
+func (c *HttpClient) UserValidatePermActionWithOrgId(service, path, method, orgId string) error {
 	return c.permitPost(ValidatePermActionWithOrgIdURL, map[string]string{
 		"service": service,
 		"path":    path,
@@ -133,8 +108,8 @@ func (c *HttpClient) ValidatePermActionWithOrgId(service, path, method, orgId st
 	})
 }
 
-func (c *HttpClient) QueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error) {
-	a, err := c.getAgent()
+func (c *HttpClient) UserQueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error) {
+	a, err := c.getUserAgent()
 	if err != nil {
 		return nil, err
 	}
@@ -158,53 +133,42 @@ func (c *HttpClient) QueryOrgIdsByAction(service, path, method string) (*ActionO
 	}, nil
 }
 
-func (c *HttpClient) OAuth2TokenByAuthorizationCode(code, clientId, clientSecret, deviceId, deviceName string) (string, error) {
-	return c.oAuthToken(map[string]string{
-		"grantType":    "authorization_code",
-		"code":         code,
-		"clientId":     clientId,
-		"clientSecret": clientSecret,
-		"deviceId":     deviceId,
-		"deviceName":   deviceName,
-	})
-}
-
-func (c *HttpClient) OAuth2TokenByPassword(username, password, deviceId, deviceName string) (string, error) {
-	return c.oAuthToken(map[string]string{
-		"grantType":  "password",
-		"username":   username,
-		"password":   password,
-		"deviceId":   deviceId,
-		"deviceName": deviceName,
-	})
-}
-
-func (c *HttpClient) oAuthToken(data map[string]string) (string, error) {
-	a, err := c.getAgent()
-	if err != nil {
-		return "", err
+func (c *HttpClient) ClientRequest(method, url string, data map[string]string) (interface{}, error) {
+	method = strings.ToUpper(method)
+	switch method {
+	case http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch:
+	default:
+		return nil, fmt.Errorf("unsupport method: %v", method)
 	}
-	result := &OAuth2TokenResponse{}
-	res, err := a.R().SetResult(result).
-		SetFormData(data).Post(OAuth2TokenURL)
+	a, err := c.getClientAgent()
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+	result := &NormalHttpResponse{}
+	request := a.R().SetResult(result)
+	if data != nil {
+		request = request.SetFormData(data)
+	}
+	res, err := request.Send(method, url)
+	if err != nil {
+		return nil, err
 	}
 	if !res.IsSuccess() {
-		return "", fmt.Errorf("error: %v", res)
+		return nil, fmt.Errorf("error: %v", res)
 	}
-	return result.Result.AccessToken, nil
+	if result.Code != 0 {
+		return nil, fmt.Errorf(result.Message)
+	}
+	return result.Result, nil
 }
 
 func (c *HttpClient) permitPost(url string, data map[string]string) error {
-	a, err := c.getAgent()
+	a, err := c.getUserAgent()
 	if err != nil {
 		return err
 	}
 	result := &PermitHttpResponse{}
-	res, err := a.R().SetResult(result).
-		SetFormData(data).
-		Post(url)
+	res, err := a.R().SetResult(result).SetFormData(data).Post(url)
 	if err != nil {
 		return err
 	}
@@ -220,10 +184,7 @@ func (c *HttpClient) permitPost(url string, data map[string]string) error {
 	return errors.New(DefaultNoPermMsg)
 }
 
-func (c *HttpClient) getAgent() (*req.Client, error) {
-	if len(c.token) == 0 {
-		return nil, errors.New("please provide token")
-	}
+func (c *HttpClient) initAgent() {
 	if c.agent == nil {
 		c.agent = req.C().
 			DisableAutoDecode().
@@ -232,9 +193,25 @@ func (c *HttpClient) getAgent() (*req.Client, error) {
 	}
 	c.agent.
 		SetTimeout(time.Duration(c.timeout)*time.Second).
-		SetCommonBearerAuthToken(c.token).
 		SetCommonHeader(c.accessCodeHeader, c.accessCode).
 		SetCommonHeader(c.randomKeyHeader, getRandomNumberString(6))
+}
+
+func (c *HttpClient) getUserAgent() (*req.Client, error) {
+	c.initAgent()
+	if len(c.userToken) == 0 {
+		return nil, errors.New("please provide userToken")
+	}
+	c.agent.SetCommonHeader(c.userTokenHeader, "Bearer "+c.userToken)
+	return c.agent, nil
+}
+
+func (c *HttpClient) getClientAgent() (*req.Client, error) {
+	c.initAgent()
+	if len(c.clientId) == 0 || len(c.clientSecret) == 0 {
+		return nil, errors.New("please provide clientId and clientSecret")
+	}
+	c.agent.SetCommonHeader(c.clientTokenHeader, base64.StdEncoding.EncodeToString([]byte(c.clientId+"@"+c.clientSecret)))
 	return c.agent, nil
 }
 

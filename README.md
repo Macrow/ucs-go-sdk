@@ -12,17 +12,10 @@
 go get -u github.com/Macrow/ucs-go-sdk
 ```
 
-### 验证Jwt
-```
-validator := NewValidator(rsaPublicKey)
-jwtUser, err := validator.ValidateJwt(token)
-```
-
 ### 创建连接UCS的客户端
 ```
-client := NewRpcClient("your.domain.com:port") // Rpc客户端
-// client := NewTLSRpcClient(certFile, "your.domain.com:port") // TLS连接下的Rpc客户端，需要UCS服务也同时开启
-// client := NewHttpClient("https://your.domain.com:port", yourAccessCode) // Http客户端
+client := NewHttpClient("http://your.domain.com:port", yourAccessCode) // Http客户端
+// client := NewHttpClient("https://your.domain.com:port", yourAccessCode) // Https客户端
 client.SetToken(token)
 ```
 
