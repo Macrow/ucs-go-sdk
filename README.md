@@ -16,25 +16,31 @@ go get -u github.com/Macrow/ucs-go-sdk
 ```
 client := NewHttpClient("http://your.domain.com:port", yourAccessCode) // Http客户端
 // client := NewHttpClient("https://your.domain.com:port", yourAccessCode) // Https客户端
-client.SetToken(token)
+client.SetUserToken(token)
+client.SetClientIdAndSecret(clientId, clientSecret)
 ```
 
 ### UCS服务端验证Jwt
 ```
-err := client.ValidateJwt()
+jwtUser, err := client.UserValidateJwt()
 ```
 
 ### UCS服务端验证操作码
 ```
-err := client.ValidatePermOperationByCode("UCS_O_CODE")
+err := client.UserValidatePermByOperation("UCS_O_CODE")
 ```
 
 ### UCS服务端验证接口
 ```
-err := client.ValidatePermAction("ucs", "/api/v1/ucs/users", "get")
+err := client.UserValidatePermByAction("ucs", "/api/v1/ucs/users", "get")
 ```
 
 ### UCS服务端验证用户是否拥有机构权限
 ```
-err := client.ValidatePermOrgById("org_id_is_here")
+err := client.UserValidatePermOrgById("org_id_is_here")
+```
+
+### 向UCS服务端发起应用级调用
+```
+res, err := client.ClientRequest("POST", "/api/v1/ucs/client/validate", nil)
 ```

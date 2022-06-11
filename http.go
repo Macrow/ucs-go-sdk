@@ -12,13 +12,13 @@ import (
 	"time"
 )
 
-type HttpClient struct {
-	baseUrl           string
+type HttpUcsClient struct {
 	timeout           int
+	baseUrl           string
+	accessCode        string
 	userToken         string
 	clientId          string
 	clientSecret      string
-	accessCode        string
 	accessCodeHeader  string
 	randomKeyHeader   string
 	userTokenHeader   string
@@ -26,25 +26,35 @@ type HttpClient struct {
 	agent             *req.Client
 }
 
-func (c *HttpClient) SetTimeout(timeout int) Client {
+func (c *HttpUcsClient) SetTimeout(timeout int) Client {
 	if timeout > 0 {
 		c.timeout = timeout
 	}
 	return c
 }
 
-func (c *HttpClient) SetUserToken(userToken string) Client {
+func (c *HttpUcsClient) SetBaseUrl(baseUrl string) Client {
+	c.baseUrl = baseUrl
+	return c
+}
+
+func (c *HttpUcsClient) SetAccessCode(accessCode string) Client {
+	c.accessCode = accessCode
+	return c
+}
+
+func (c *HttpUcsClient) SetUserToken(userToken string) Client {
 	c.userToken = userToken
 	return c
 }
 
-func (c *HttpClient) SetClientIdAndSecret(clientId, clientSecret string) Client {
+func (c *HttpUcsClient) SetClientIdAndSecret(clientId, clientSecret string) Client {
 	c.clientId = clientId
 	c.clientSecret = clientSecret
 	return c
 }
 
-func (c *HttpClient) SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userTokenHeader, clientTokenHeader string) Client {
+func (c *HttpUcsClient) SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userTokenHeader, clientTokenHeader string) Client {
 	if len(accessCodeHeader) > 0 {
 		c.accessCodeHeader = accessCodeHeader
 	}
@@ -60,7 +70,7 @@ func (c *HttpClient) SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userT
 	return c
 }
 
-func (c *HttpClient) UserValidateJwt() (*JwtUser, error) {
+func (c *HttpUcsClient) UserValidateJwt() (*JwtUser, error) {
 	a, err := c.getUserAgent()
 	if err != nil {
 		return nil, err
@@ -79,68 +89,45 @@ func (c *HttpClient) UserValidateJwt() (*JwtUser, error) {
 	return nil, errors.New(result.Message)
 }
 
-func (c *HttpClient) UserValidatePermOperationByCode(operationCode string) error {
-	return c.permitPost(ValidatePermOperationByCodeURL, map[string]string{
+func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string) error {
+	return c.permitPost(ValidatePermByOperationURL, map[string]string{
 		"code": operationCode,
 	})
 }
 
-func (c *HttpClient) UserValidatePermAction(service, path, method string) error {
-	return c.permitPost(ValidatePermActionURL, map[string]string{
+func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string) error {
+	return c.permitPost(ValidatePermByActionURL, map[string]string{
 		"service": service,
-		"path":    path,
 		"method":  method,
-	})
-}
-
-func (c *HttpClient) UserValidatePermOrgById(orgId string) error {
-	return c.permitPost(ValidatePermOrgByIdURL, map[string]string{
-		"id": orgId,
-	})
-}
-
-func (c *HttpClient) UserValidatePermActionWithOrgId(service, path, method, orgId string) error {
-	return c.permitPost(ValidatePermActionWithOrgIdURL, map[string]string{
-		"service": service,
 		"path":    path,
-		"method":  method,
-		"orgId":   orgId,
 	})
 }
 
-func (c *HttpClient) UserQueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error) {
-	a, err := c.getUserAgent()
-	if err != nil {
-		return nil, err
-	}
-	result := &QueryActionOrgIdsHttpResponse{}
-	res, err := a.R().SetResult(result).
-		SetFormData(map[string]string{
-			"service": service,
-			"path":    path,
-			"method":  method,
-		}).
-		Post(QueryOrgIdsByActionURL)
-	if err != nil {
-		return nil, err
-	}
-	if !res.IsSuccess() {
-		return nil, fmt.Errorf("error: %v", res)
-	}
-	return &ActionOrgIds{
-		orgPermissionType: OrgPermissionType(result.Result.OrgPermissionType),
-		orgIds:            result.Result.OrgIds,
-	}, nil
+func (c *HttpUcsClient) UserRequest(method, url string, data map[string]string) (interface{}, error) {
+	return c.genericRequest(USER, method, url, data)
 }
 
-func (c *HttpClient) ClientRequest(method, url string, data map[string]string) (interface{}, error) {
+func (c *HttpUcsClient) ClientRequest(method, url string, data map[string]string) (interface{}, error) {
+	return c.genericRequest(CLIENT, method, url, data)
+}
+
+func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, data map[string]string) (interface{}, error) {
 	method = strings.ToUpper(method)
 	switch method {
 	case http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch:
 	default:
 		return nil, fmt.Errorf("unsupport method: %v", method)
 	}
-	a, err := c.getClientAgent()
+	var a *req.Client
+	var err error
+	switch kind {
+	case USER:
+		a, err = c.getUserAgent()
+	case CLIENT:
+		a, err = c.getClientAgent()
+	default:
+		return nil, fmt.Errorf("unsupport request kind: %v", kind)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +149,7 @@ func (c *HttpClient) ClientRequest(method, url string, data map[string]string) (
 	return result.Result, nil
 }
 
-func (c *HttpClient) permitPost(url string, data map[string]string) error {
+func (c *HttpUcsClient) permitPost(url string, data map[string]string) error {
 	a, err := c.getUserAgent()
 	if err != nil {
 		return err
@@ -184,7 +171,7 @@ func (c *HttpClient) permitPost(url string, data map[string]string) error {
 	return errors.New(DefaultNoPermMsg)
 }
 
-func (c *HttpClient) initAgent() {
+func (c *HttpUcsClient) initAgent() {
 	if c.agent == nil {
 		c.agent = req.C().
 			DisableAutoDecode().
@@ -197,7 +184,7 @@ func (c *HttpClient) initAgent() {
 		SetCommonHeader(c.randomKeyHeader, getRandomNumberString(6))
 }
 
-func (c *HttpClient) getUserAgent() (*req.Client, error) {
+func (c *HttpUcsClient) getUserAgent() (*req.Client, error) {
 	c.initAgent()
 	if len(c.userToken) == 0 {
 		return nil, errors.New("please provide userToken")
@@ -206,7 +193,7 @@ func (c *HttpClient) getUserAgent() (*req.Client, error) {
 	return c.agent, nil
 }
 
-func (c *HttpClient) getClientAgent() (*req.Client, error) {
+func (c *HttpUcsClient) getClientAgent() (*req.Client, error) {
 	c.initAgent()
 	if len(c.clientId) == 0 || len(c.clientSecret) == 0 {
 		return nil, errors.New("please provide clientId and clientSecret")

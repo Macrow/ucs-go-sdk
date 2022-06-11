@@ -1,7 +1,7 @@
 package ucs
 
 func NewHttpClient(baseUrl string, accessCode string) Client {
-	client := &HttpClient{
+	client := &HttpUcsClient{
 		baseUrl:           baseUrl,
 		accessCode:        accessCode,
 		timeout:           DefaultTimeout,

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY4NjMyNjcwMywiaWF0IjoxNjU0NzkwNzAzLCJpZCI6ImNhaDFrOHV2OW1jNnU1dTdmaWNnIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.GtGvfltbGmV79SWoxaPX6dYrTyaHGLak_Zg3D7PfujJWMDBi5R8s0POS2TRm7LNFZxUeqRancjj9EGPnKdWsw9oH_nCPBjVhF_YY0U9CqtMnI6WAIrtIt9ouOJxfIW_TmJQumHzaqrclULAoL-_-LgoKJFiLuHhcOtsuinK0eH0UHsF7ruW0YY1a1E3pg6gKVjom17Y1V1RaLjDQpirqojfQtqZjgpaaa2IRBMSvmtLXfG1BFAIQd_SSr3EqugxQItkp5rQdMJzNWHhHn041pmE2dHXA1n7UmBha9z1q2jo8u4EkPzUYD2AxRJVs3k1GiesByGR_UOyrVbmS1ojYFQ`
+const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY4NjQyMzE3MCwiaWF0IjoxNjU0ODg3MTcwLCJpZCI6ImNhaDFrOHV2OW1jNnU1dTdmaWNnIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.IhgvqpWe9TJvSm1x39HH0LSiKwoZp1ge6GQgDOSKKcbAzArUEFaKJfpoJQUCJVJeq-I8TpUVSEjdwRh8Hty03L0G79POlqb87u-hzh29RmfP9tFNPY565Zm9GyB0kybiWA68ZQriDiTZaUEk1K2N4sq85HIpArV04haSvE9lJ46v2wrNprcVRxjWFWWxAt1qeBZFPuUtFk93A1OIWn2PbxE_fmlE1qVjqwukpanIKR9y3O2geC4F4-ed9qA8VZl0N8IHjMLABE-oIPa0Tlvt9tVoJ1sx0LqlA5GphZHXARDzgr2hdytuE_OxJeyULkadKVvqMZgeNRnwL404DoSx-Q`
 const clientId = "wsTDJzgAKg"
 const clientSecret = "123456"
 
@@ -18,31 +18,21 @@ func testByClient(client Client) {
 		fmt.Println(jwtUser)
 	}
 
-	err = client.UserValidatePermOperationByCode("不存在的操作")
+	err = client.UserValidatePermByOperation("不存在的操作")
 	fmt.Println(err)
 
-	err = client.UserValidatePermOperationByCode("UCS_USER_LIST")
+	err = client.UserValidatePermByOperation("UCS_USER_LIST")
 	fmt.Println(err)
 
-	err = client.UserValidatePermAction("ucs", "/api/v1/ucs/users", "get")
+	err = client.UserValidatePermByAction("ucs", "GET", "/api/v1/ucs/users")
 	fmt.Println(err)
 
-	err = client.UserValidatePermOrgById("rererwerw")
-	fmt.Println(err)
-
-	err = client.UserValidatePermOrgById("c8fjca649b3hbmov5n60")
-	fmt.Println(err)
-
-	err = client.UserValidatePermActionWithOrgId("ucs", "/api/v1/ucs/users", "get", "c8fjca649b3hbmov5n60")
-	fmt.Println(err)
-
-	err = client.UserValidatePermActionWithOrgId("ucs", "/api/v1/ucs/users", "get", "234sdfsdja")
-	fmt.Println(err)
-
-	res, err := client.UserQueryOrgIdsByAction("ucs", "/api/v1/ucs/users", "get")
-	fmt.Println(err)
-	fmt.Println(res.orgPermissionType)
-	fmt.Println(res.orgIds)
+	userRes, err := client.UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(userRes)
+	}
 
 	clientRes, err := client.ClientRequest("POST", "/api/v1/ucs/client/validate", nil)
 	if err != nil {

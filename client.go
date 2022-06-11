@@ -2,16 +2,16 @@ package ucs
 
 type Client interface {
 	SetTimeout(timeout int) Client
+	SetBaseUrl(baseUrl string) Client
+	SetAccessCode(accessCode string) Client
 	SetUserToken(userToken string) Client
 	SetClientIdAndSecret(clientId, clientSecret string) Client
 	SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userTokenHeader, clientTokenHeader string) Client
 
 	UserValidateJwt() (*JwtUser, error)
-	UserValidatePermOperationByCode(operationCode string) error
-	UserValidatePermAction(service, path, method string) error
-	UserValidatePermOrgById(orgId string) error
-	UserValidatePermActionWithOrgId(service, path, method, orgId string) error
-	UserQueryOrgIdsByAction(service, path, method string) (*ActionOrgIds, error)
+	UserValidatePermByOperation(code string) error
+	UserValidatePermByAction(service, method, path string) error
 
+	UserRequest(method, url string, data map[string]string) (interface{}, error)
 	ClientRequest(method, url string, data map[string]string) (interface{}, error)
 }
