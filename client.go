@@ -9,8 +9,8 @@ type Client interface {
 	SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userTokenHeader, clientTokenHeader string) Client
 
 	UserValidateJwt() (*JwtUser, error)
-	UserValidatePermByOperation(code string) error
-	UserValidatePermByAction(service, method, path string) error
+	UserValidatePermByOperation(code string, fulfillJwt bool) error
+	UserValidatePermByAction(service, method, path string, fulfillJwt bool) error
 
 	UserRequest(method, url string, data map[string]string) (interface{}, error)
 	ClientRequest(method, url string, data map[string]string) (interface{}, error)

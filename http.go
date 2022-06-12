@@ -89,17 +89,27 @@ func (c *HttpUcsClient) UserValidateJwt() (*JwtUser, error) {
 	return nil, errors.New(result.Message)
 }
 
-func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string) error {
+func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfillJwt bool) error {
+	fulfillJwtParam := "0"
+	if fulfillJwt {
+		fulfillJwtParam = "1"
+	}
 	return c.permitPost(ValidatePermByOperationURL, map[string]string{
-		"code": operationCode,
+		"code":       operationCode,
+		"fulfillJwt": fulfillJwtParam,
 	})
 }
 
-func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string) error {
+func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string, fulfillJwt bool) error {
+	fulfillJwtParam := "0"
+	if fulfillJwt {
+		fulfillJwtParam = "1"
+	}
 	return c.permitPost(ValidatePermByActionURL, map[string]string{
-		"service": service,
-		"method":  method,
-		"path":    path,
+		"service":    service,
+		"method":     method,
+		"path":       path,
+		"fulfillJwt": fulfillJwtParam,
 	})
 }
 
