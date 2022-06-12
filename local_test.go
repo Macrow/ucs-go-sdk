@@ -18,13 +18,19 @@ func testByClient(client Client) {
 		fmt.Println(jwtUser)
 	}
 
-	err = client.UserValidatePermByOperation("不存在的操作", false)
+	res, err := client.UserValidatePermByOperation("不存在的操作", true)
+	fmt.Println(res.User)
+	fmt.Println(res.Permit)
 	fmt.Println(err)
 
-	err = client.UserValidatePermByOperation("UCS_USER_LIST", false)
+	res, err = client.UserValidatePermByOperation("UCS_USER_LIST", true)
+	fmt.Println(res.User)
+	fmt.Println(res.Permit)
 	fmt.Println(err)
 
-	err = client.UserValidatePermByAction("ucs", "GET", "/api/v1/ucs/users", false)
+	res, err = client.UserValidatePermByAction("ucs", "GET", "/api/v1/ucs/users", true)
+	fmt.Println(res.User)
+	fmt.Println(res.Permit)
 	fmt.Println(err)
 
 	userRes, err := client.UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil)

@@ -81,7 +81,7 @@ func (c *HttpUcsClient) UserValidateJwt() (*JwtUser, error) {
 		return nil, err
 	}
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("error: %v", res)
+		return nil, fmt.Errorf("error: %v", res.Error())
 	}
 	if result.Code == 0 {
 		return &JwtUser{RawJwtUser: result.Result, Token: c.userToken}, nil
@@ -89,7 +89,7 @@ func (c *HttpUcsClient) UserValidateJwt() (*JwtUser, error) {
 	return nil, errors.New(result.Message)
 }
 
-func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfillJwt bool) error {
+func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfillJwt bool) (*PermitResult, error) {
 	fulfillJwtParam := "0"
 	if fulfillJwt {
 		fulfillJwtParam = "1"
@@ -100,7 +100,7 @@ func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfil
 	})
 }
 
-func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string, fulfillJwt bool) error {
+func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string, fulfillJwt bool) (*PermitResult, error) {
 	fulfillJwtParam := "0"
 	if fulfillJwt {
 		fulfillJwtParam = "1"
@@ -141,7 +141,7 @@ func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, dat
 	if err != nil {
 		return nil, err
 	}
-	result := &NormalHttpResponse{}
+	result := &HttpResponse{}
 	request := a.R().SetResult(result)
 	if data != nil {
 		request = request.SetFormData(data)
@@ -151,7 +151,7 @@ func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, dat
 		return nil, err
 	}
 	if !res.IsSuccess() {
-		return nil, fmt.Errorf("error: %v", res)
+		return nil, fmt.Errorf("error: %v", res.Error())
 	}
 	if result.Code != 0 {
 		return nil, fmt.Errorf(result.Message)
@@ -159,26 +159,21 @@ func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, dat
 	return result.Result, nil
 }
 
-func (c *HttpUcsClient) permitPost(url string, data map[string]string) error {
+func (c *HttpUcsClient) permitPost(url string, data map[string]string) (*PermitResult, error) {
 	a, err := c.getUserAgent()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	result := &PermitHttpResponse{}
 	res, err := a.R().SetResult(result).SetFormData(data).Post(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !res.IsSuccess() {
-		return fmt.Errorf("error: %v", res)
+		return nil, fmt.Errorf("error: %v", res.Error())
 	}
-	if result.Result.Permit {
-		return nil
-	}
-	if len(result.Message) > 0 {
-		return errors.New(result.Message)
-	}
-	return errors.New(DefaultNoPermMsg)
+	result.Result.User.Token = c.userToken
+	return &result.Result, nil
 }
 
 func (c *HttpUcsClient) initAgent() {

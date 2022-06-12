@@ -1,6 +1,6 @@
 package ucs
 
-type NormalHttpResponse struct {
+type HttpResponse struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
 	Result  interface{} `json:"result"`
@@ -12,12 +12,13 @@ type ValidateJwtHttpResponse struct {
 	Result  RawJwtUser `json:"result"`
 }
 
-type CommonPermitResult struct {
-	Permit bool `json:"permit"`
+type PermitResult struct {
+	Permit bool     `json:"permit"`
+	User   *JwtUser `json:"user"`
 }
 
 type PermitHttpResponse struct {
-	Code    int                `json:"code"`
-	Message string             `json:"message"`
-	Result  CommonPermitResult `json:"result"`
+	Code    int          `json:"code"`
+	Message string       `json:"message"`
+	Result  PermitResult `json:"result"`
 }
