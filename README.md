@@ -27,20 +27,20 @@ jwtUser, err := client.UserValidateJwt()
 
 ### UCS服务端验证操作码
 ```
-err := client.UserValidatePermByOperation("UCS_O_CODE")
+res, err := client.UserValidatePermByOperation("UCS_O_CODE", true)
 ```
 
 ### UCS服务端验证接口
 ```
-err := client.UserValidatePermByAction("ucs", "/api/v1/ucs/users", "get")
-```
-
-### UCS服务端验证用户是否拥有机构权限
-```
-err := client.UserValidatePermOrgById("org_id_is_here")
+res, err := client.UserValidatePermByAction("ucs", "get", "/api/v1/ucs/users", true)
 ```
 
 ### 向UCS服务端发起应用级调用
 ```
 res, err := client.ClientRequest("POST", "/api/v1/ucs/client/validate", nil)
+```
+
+### 向UCS服务端发起用户级调用
+```
+res, err := client.UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil)
 ```
