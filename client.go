@@ -5,6 +5,7 @@ type Client interface {
 	SetBaseUrl(baseUrl string) Client
 	SetAccessCode(accessCode string) Client
 	SetUserToken(userToken string) Client
+	SetClientToken(clientToken string) Client
 	SetClientIdAndSecret(clientId, clientSecret string) Client
 	SetHttpHeaderNames(accessCodeHeader, randomKeyHeader, userTokenHeader, clientTokenHeader string) Client
 
@@ -13,5 +14,5 @@ type Client interface {
 	UserValidatePermByAction(service, method, path string, fulfillJwt bool) (*PermitResult, error)
 
 	UserRequest(method, url string, data map[string]string) (interface{}, error)
-	ClientRequest(method, url string, data map[string]string) (interface{}, error)
+	ClientRequest(method, url string, data map[string]string, clientAuthKind ClientAuthKind) (interface{}, error)
 }

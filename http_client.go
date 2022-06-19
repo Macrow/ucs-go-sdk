@@ -17,6 +17,7 @@ type HttpUcsClient struct {
 	baseUrl           string
 	accessCode        string
 	userToken         string
+	clientToken       string
 	clientId          string
 	clientSecret      string
 	accessCodeHeader  string
@@ -45,6 +46,11 @@ func (c *HttpUcsClient) SetAccessCode(accessCode string) Client {
 
 func (c *HttpUcsClient) SetUserToken(userToken string) Client {
 	c.userToken = userToken
+	return c
+}
+
+func (c *HttpUcsClient) SetClientToken(clientToken string) Client {
+	c.clientToken = clientToken
 	return c
 }
 
@@ -114,14 +120,14 @@ func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string, f
 }
 
 func (c *HttpUcsClient) UserRequest(method, url string, data map[string]string) (interface{}, error) {
-	return c.genericRequest(USER, method, url, data)
+	return c.genericRequest(RequestKindUser, method, url, data, ClientAuthKindNone)
 }
 
-func (c *HttpUcsClient) ClientRequest(method, url string, data map[string]string) (interface{}, error) {
-	return c.genericRequest(CLIENT, method, url, data)
+func (c *HttpUcsClient) ClientRequest(method, url string, data map[string]string, clientAuthKind ClientAuthKind) (interface{}, error) {
+	return c.genericRequest(RequestKindClient, method, url, data, clientAuthKind)
 }
 
-func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, data map[string]string) (interface{}, error) {
+func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, data map[string]string, clientAuthKind ClientAuthKind) (interface{}, error) {
 	method = strings.ToUpper(method)
 	switch method {
 	case http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch:
@@ -131,10 +137,10 @@ func (c *HttpUcsClient) genericRequest(kind RequestKind, method, url string, dat
 	var a *req.Client
 	var err error
 	switch kind {
-	case USER:
+	case RequestKindUser:
 		a, err = c.getUserAgent()
-	case CLIENT:
-		a, err = c.getClientAgent()
+	case RequestKindClient:
+		a, err = c.getClientAgent(clientAuthKind)
 	default:
 		return nil, fmt.Errorf("unsupport request kind: %v", kind)
 	}
@@ -198,12 +204,25 @@ func (c *HttpUcsClient) getUserAgent() (*req.Client, error) {
 	return c.agent, nil
 }
 
-func (c *HttpUcsClient) getClientAgent() (*req.Client, error) {
+func (c *HttpUcsClient) getClientAgent(clientAuthKind ClientAuthKind) (*req.Client, error) {
 	c.initAgent()
-	if len(c.clientId) == 0 || len(c.clientSecret) == 0 {
-		return nil, errors.New("please provide clientId and clientSecret")
+	var clientToken string
+	switch clientAuthKind {
+	case ClientAuthKindToken:
+		if len(c.clientToken) == 0 {
+			return nil, errors.New("请提供客户端令牌")
+		}
+		clientToken = c.clientToken
+	case ClientAuthKindIdAndSecret:
+		if len(c.clientId) == 0 || len(c.clientSecret) == 0 {
+			return nil, errors.New("please provide clientId and clientSecret")
+		}
+		clientToken = base64.StdEncoding.EncodeToString([]byte(c.clientId + "@" + c.clientSecret))
+	default:
+		return nil, errors.New("客户端认证方式[" + string(clientAuthKind) + "]错误")
 	}
-	c.agent.SetCommonHeader(c.clientTokenHeader, base64.StdEncoding.EncodeToString([]byte(c.clientId+"@"+c.clientSecret)))
+
+	c.agent.SetCommonHeader(c.clientTokenHeader, "Bearer "+clientToken)
 	return c.agent, nil
 }
 

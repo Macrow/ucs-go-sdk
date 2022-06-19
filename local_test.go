@@ -5,7 +5,8 @@ import (
 	"testing"
 )
 
-const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY4NjQyMzE3MCwiaWF0IjoxNjU0ODg3MTcwLCJpZCI6ImNhaDFrOHV2OW1jNnU1dTdmaWNnIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.IhgvqpWe9TJvSm1x39HH0LSiKwoZp1ge6GQgDOSKKcbAzArUEFaKJfpoJQUCJVJeq-I8TpUVSEjdwRh8Hty03L0G79POlqb87u-hzh29RmfP9tFNPY565Zm9GyB0kybiWA68ZQriDiTZaUEk1K2N4sq85HIpArV04haSvE9lJ46v2wrNprcVRxjWFWWxAt1qeBZFPuUtFk93A1OIWn2PbxE_fmlE1qVjqwukpanIKR9y3O2geC4F4-ed9qA8VZl0N8IHjMLABE-oIPa0Tlvt9tVoJ1sx0LqlA5GphZHXARDzgr2hdytuE_OxJeyULkadKVvqMZgeNRnwL404DoSx-Q`
+const token = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOiJhZG1pbl93ZWIiLCJkbiI6IkNocm9tZSIsImV4cCI6MTY4NzA1ODI1OSwiaWF0IjoxNjU1NTIyMjU5LCJpZCI6ImNhaDFrOHV2OW1jNnU1dTdmaWNnIiwiaXNzIjoidWNzIiwibmFtZSI6InJvb3QifQ.m2uOt7IlZpfng_UhBM2aeVETjhABp0sreAeqgJRT6QejXhaogNY3qXjr-ANi_oXqsVkA0Tof3z2qCMwl0mrHc5WEHXPvCRr_gOJ184z10Lf1z6cxaaQ4gt1R3TlCHst3DIlyl4iRAstLjfnlmm3aTWYZMjK-d3FXKA6i2yWZAXMInEoijpNMlYFGaojFfEZjlTPTp_Lmj4Spus7s8f_AjvckUJfYcymvRJHR9M7YEgRq2Lu_E-y4IsCGt9PphDah12JFv8-qg6UWFheiNIgg5rcQ0KKZcal73wpm9tmVEpJbn8SBsRV_tMfIOvjC8Vvbfh_-DoYWD3ZNtivrd8VMbg`
+const clientToken = "d3NUREp6Z0FLZ0AxMjM0NTY="
 const clientId = "wsTDJzgAKg"
 const clientSecret = "123456"
 
@@ -40,17 +41,25 @@ func testByClient(client Client) {
 		fmt.Println(userRes)
 	}
 
-	clientRes, err := client.ClientRequest("POST", "/api/v1/ucs/client/validate", nil)
+	_, err = client.ClientRequest("GET", "/api/v1/ucs/client/validate", nil, ClientAuthKindToken)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(clientRes)
+		fmt.Println("应用鉴权成功")
+	}
+
+	_, err = client.ClientRequest("GET", "/api/v1/ucs/client/validate", nil, ClientAuthKindIdAndSecret)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("应用鉴权成功")
 	}
 }
 
 func TestHttp(t *testing.T) {
 	client := NewHttpClient("http://localhost:8019", "1A2B3C4D")
 	client.SetUserToken(token)
+	client.SetClientToken(clientToken)
 	client.SetClientIdAndSecret(clientId, clientSecret)
 	testByClient(client)
 }
@@ -58,6 +67,7 @@ func TestHttp(t *testing.T) {
 func TestTlsHttp(t *testing.T) {
 	client := NewHttpClient("https://localhost:8019", "1A2B3C4D")
 	client.SetUserToken(token)
+	client.SetClientToken(clientToken)
 	client.SetClientIdAndSecret(clientId, clientSecret)
 	testByClient(client)
 }

@@ -42,5 +42,6 @@ res, err := client.ClientRequest("POST", "/api/v1/ucs/client/validate", nil)
 
 ### 向UCS服务端发起用户级调用
 ```
-res, err := client.UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil)
+res, err := client.setClientToken("your token").UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil, ClientAuthKindToken)
+res, err := client.SetClientIdAndSecret("id", "secret").UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil, ClientAuthKindIdAndSecret)
 ```
