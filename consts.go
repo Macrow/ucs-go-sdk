@@ -17,6 +17,7 @@ const (
 	DefaultTimeout                           = 3
 
 	ValidateJwtURL             = "/api/v1/ucs/current/jwt"
+	ValidateClientURL          = "/api/v1/ucs/client/validate"
 	ValidatePermByOperationURL = "/api/v1/ucs/current/check-operation"
 	ValidatePermByActionURL    = "/api/v1/ucs/current/check-action"
 )

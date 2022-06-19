@@ -18,6 +18,18 @@ func testByClient(client Client) {
 	if jwtUser != nil {
 		fmt.Println(jwtUser)
 	}
+	ok, err := client.ClientValidate(ClientAuthKindToken)
+	if ok {
+		fmt.Println("应用端鉴权成功")
+	} else {
+		fmt.Println(err)
+	}
+	ok, err = client.ClientValidate(ClientAuthKindIdAndSecret)
+	if ok {
+		fmt.Println("应用端鉴权成功")
+	} else {
+		fmt.Println(err)
+	}
 
 	res, err := client.UserValidatePermByOperation("不存在的操作", true)
 	fmt.Println(res.User)

@@ -95,6 +95,25 @@ func (c *HttpUcsClient) UserValidateJwt() (*JwtUser, error) {
 	return nil, errors.New(result.Message)
 }
 
+func (c *HttpUcsClient) ClientValidate(clientAuthKind ClientAuthKind) (bool, error) {
+	a, err := c.getClientAgent(clientAuthKind)
+	if err != nil {
+		return false, err
+	}
+	result := &HttpResponse{}
+	res, err := a.R().SetResult(result).Get(ValidateClientURL)
+	if err != nil {
+		return false, err
+	}
+	if !res.IsSuccess() {
+		return false, fmt.Errorf("error: %v", res.Error())
+	}
+	if result.Code == 0 {
+		return true, nil
+	}
+	return false, errors.New(result.Message)
+}
+
 func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfillJwt bool) (*PermitResult, error) {
 	fulfillJwtParam := "0"
 	if fulfillJwt {
