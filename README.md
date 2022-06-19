@@ -25,6 +25,12 @@ client.SetClientIdAndSecret(clientId, clientSecret)
 jwtUser, err := client.UserValidateJwt()
 ```
 
+### UCS服务端验证客户端身份
+```
+ok, err := client.SetClientToken("token").ClientValidateJwt(ClientAuthKindToken) // 通过令牌方式
+ok, err := client.SetClientIdAndSecret("id", "secret").ClientValidateJwt(ClientAuthKindIdAndSecret) // 通过id和secret方式
+```
+
 ### UCS服务端验证操作码
 ```
 res, err := client.UserValidatePermByOperation("UCS_O_CODE", true)
