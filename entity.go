@@ -15,6 +15,7 @@ type ValidateJwtHttpResponse struct {
 type PermitResult struct {
 	Permit bool     `json:"permit"`
 	User   *JwtUser `json:"user"`
+	OrgIds []string `json:"orgIds"`
 }
 
 type PermitHttpResponse struct {

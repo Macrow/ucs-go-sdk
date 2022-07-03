@@ -114,27 +114,37 @@ func (c *HttpUcsClient) ClientValidate(clientAuthKind ClientAuthKind) (bool, err
 	return false, errors.New(result.Message)
 }
 
-func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfillJwt bool) (*PermitResult, error) {
+func (c *HttpUcsClient) UserValidatePermByOperation(operationCode string, fulfillJwt bool, fulfillOrgIds bool) (*PermitResult, error) {
 	fulfillJwtParam := "0"
 	if fulfillJwt {
 		fulfillJwtParam = "1"
 	}
+	fulfillOrgIdsParam := "0"
+	if fulfillOrgIds {
+		fulfillOrgIdsParam = "1"
+	}
 	return c.permitPost(ValidatePermByOperationURL, map[string]string{
-		"code":       operationCode,
-		"fulfillJwt": fulfillJwtParam,
+		"code":          operationCode,
+		"fulfillJwt":    fulfillJwtParam,
+		"fulfillOrgIds": fulfillOrgIdsParam,
 	})
 }
 
-func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string, fulfillJwt bool) (*PermitResult, error) {
+func (c *HttpUcsClient) UserValidatePermByAction(service, method, path string, fulfillJwt bool, fulfillOrgIds bool) (*PermitResult, error) {
 	fulfillJwtParam := "0"
 	if fulfillJwt {
 		fulfillJwtParam = "1"
 	}
+	fulfillOrgIdsParam := "0"
+	if fulfillOrgIds {
+		fulfillOrgIdsParam = "1"
+	}
 	return c.permitPost(ValidatePermByActionURL, map[string]string{
-		"service":    service,
-		"method":     method,
-		"path":       path,
-		"fulfillJwt": fulfillJwtParam,
+		"service":       service,
+		"method":        method,
+		"path":          path,
+		"fulfillJwt":    fulfillJwtParam,
+		"fulfillOrgIds": fulfillOrgIdsParam,
 	})
 }
 
@@ -197,7 +207,9 @@ func (c *HttpUcsClient) permitPost(url string, data map[string]string) (*PermitR
 	if !res.IsSuccess() {
 		return nil, fmt.Errorf("error: %v", res.Error())
 	}
-	result.Result.User.Token = c.userToken
+	if result.Result.User != nil {
+		result.Result.User.Token = c.userToken
+	}
 	return &result.Result, nil
 }
 

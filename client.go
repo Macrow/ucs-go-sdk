@@ -11,8 +11,8 @@ type Client interface {
 
 	UserValidateJwt() (*JwtUser, error)
 	ClientValidate(clientAuthKind ClientAuthKind) (bool, error)
-	UserValidatePermByOperation(code string, fulfillJwt bool) (*PermitResult, error)
-	UserValidatePermByAction(service, method, path string, fulfillJwt bool) (*PermitResult, error)
+	UserValidatePermByOperation(code string, fulfillJwt bool, fulfillOrgIds bool) (*PermitResult, error)
+	UserValidatePermByAction(service, method, path string, fulfillJwt bool, fulfillOrgIds bool) (*PermitResult, error)
 
 	UserRequest(method, url string, data map[string]string) (interface{}, error)
 	ClientRequest(method, url string, data map[string]string, clientAuthKind ClientAuthKind) (interface{}, error)
