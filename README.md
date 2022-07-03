@@ -33,12 +33,12 @@ ok, err := client.SetClientIdAndSecret("id", "secret").ClientValidateJwt(ClientA
 
 ### UCS服务端验证操作码
 ```
-res, err := client.UserValidatePermByOperation("UCS_O_CODE", true)
+res, err := client.UserValidatePermByOperation("UCS_O_CODE", true, true)
 ```
 
 ### UCS服务端验证接口
 ```
-res, err := client.UserValidatePermByAction("ucs", "get", "/api/v1/ucs/users", true)
+res, err := client.UserValidatePermByAction("ucs", "get", "/api/v1/ucs/users", true, true)
 ```
 
 ### 向UCS服务端发起应用级调用
