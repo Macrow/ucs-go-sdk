@@ -16,6 +16,7 @@ type HttpUcsClient struct {
 	timeout           int
 	baseUrl           string
 	accessCode        string
+	randomKey         string
 	userToken         string
 	clientToken       string
 	clientId          string
@@ -41,6 +42,11 @@ func (c *HttpUcsClient) SetBaseUrl(baseUrl string) Client {
 
 func (c *HttpUcsClient) SetAccessCode(accessCode string) Client {
 	c.accessCode = accessCode
+	return c
+}
+
+func (c *HttpUcsClient) SetRandomKey(randomKey string) Client {
+	c.randomKey = randomKey
 	return c
 }
 
@@ -223,7 +229,7 @@ func (c *HttpUcsClient) initAgent() {
 	c.agent.
 		SetTimeout(time.Duration(c.timeout)*time.Second).
 		SetCommonHeader(c.accessCodeHeader, c.accessCode).
-		SetCommonHeader(c.randomKeyHeader, getRandomNumberString(6))
+		SetCommonHeader(c.randomKeyHeader, c.randomKey)
 }
 
 func (c *HttpUcsClient) getUserAgent() (*req.Client, error) {
@@ -257,10 +263,10 @@ func (c *HttpUcsClient) getClientAgent(clientAuthKind ClientAuthKind) (*req.Clie
 	return c.agent, nil
 }
 
-func getRandomNumberString(length int) string {
+func GenerateRandomKey() string {
 	rand.Seed(time.Now().UnixNano())
 	output := ""
-	for i := 0; i < length; i++ {
+	for i := 0; i < 6; i++ {
 		output += strconv.Itoa(rand.Intn(10))
 	}
 	return output

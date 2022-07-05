@@ -4,6 +4,7 @@ type Client interface {
 	SetTimeout(timeout int) Client
 	SetBaseUrl(baseUrl string) Client
 	SetAccessCode(accessCode string) Client
+	SetRandomKey(randomKey string) Client
 	SetUserToken(userToken string) Client
 	SetClientToken(clientToken string) Client
 	SetClientIdAndSecret(clientId, clientSecret string) Client

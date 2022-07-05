@@ -11,59 +11,59 @@ const clientId = "wsTDJzgAKg"
 const clientSecret = "123456"
 
 func testByClient(client Client) {
-	jwtUser, err := client.UserValidateJwt()
+	jwtUser, err := client.SetRandomKey(GenerateRandomKey()).UserValidateJwt()
 	if err != nil {
 		fmt.Println(err)
 	}
 	if jwtUser != nil {
 		fmt.Println(jwtUser)
 	}
-	ok, err := client.ClientValidate(ClientAuthKindToken)
+	ok, err := client.SetRandomKey(GenerateRandomKey()).ClientValidate(ClientAuthKindToken)
 	if ok {
 		fmt.Println("应用端鉴权成功")
 	} else {
 		fmt.Println(err)
 	}
-	ok, err = client.ClientValidate(ClientAuthKindIdAndSecret)
+	ok, err = client.SetRandomKey(GenerateRandomKey()).ClientValidate(ClientAuthKindIdAndSecret)
 	if ok {
 		fmt.Println("应用端鉴权成功")
 	} else {
 		fmt.Println(err)
 	}
 
-	res, err := client.UserValidatePermByOperation("不存在的操作", true, true)
+	res, err := client.SetRandomKey(GenerateRandomKey()).UserValidatePermByOperation("不存在的操作", true, true)
 	fmt.Println(res.User)
 	fmt.Println(res.Permit)
 	fmt.Println(res.OrgIds)
 	fmt.Println(err)
 
-	res, err = client.UserValidatePermByOperation("UCS_USER_LIST", true, true)
+	res, err = client.SetRandomKey(GenerateRandomKey()).UserValidatePermByOperation("UCS_USER_LIST", true, true)
 	fmt.Println(res.User)
 	fmt.Println(res.Permit)
 	fmt.Println(res.OrgIds)
 	fmt.Println(err)
 
-	res, err = client.UserValidatePermByAction("ucs", "GET", "/api/v1/ucs/users", true, true)
+	res, err = client.SetRandomKey(GenerateRandomKey()).UserValidatePermByAction("ucs", "GET", "/api/v1/ucs/users", true, true)
 	fmt.Println(res.User)
 	fmt.Println(res.Permit)
 	fmt.Println(res.OrgIds)
 	fmt.Println(err)
 
-	userRes, err := client.UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil)
+	userRes, err := client.SetRandomKey(GenerateRandomKey()).UserRequest("GET", "/api/v1/ucs/users?pageSize=1", nil)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(userRes)
 	}
 
-	_, err = client.ClientRequest("GET", "/api/v1/ucs/client/validate", nil, ClientAuthKindToken)
+	_, err = client.SetRandomKey(GenerateRandomKey()).ClientRequest("GET", "/api/v1/ucs/client/validate", nil, ClientAuthKindToken)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println("应用鉴权成功")
 	}
 
-	_, err = client.ClientRequest("GET", "/api/v1/ucs/client/validate", nil, ClientAuthKindIdAndSecret)
+	_, err = client.SetRandomKey(GenerateRandomKey()).ClientRequest("GET", "/api/v1/ucs/client/validate", nil, ClientAuthKindIdAndSecret)
 	if err != nil {
 		fmt.Println(err)
 	} else {
